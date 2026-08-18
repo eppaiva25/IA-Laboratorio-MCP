@@ -25,35 +25,68 @@ V:\Claude Code\Laboratorio-IA
 - Aprendemos a consultar git status.
 - Aprendemos a consultar git log.
 - Aprendemos a consultar git diff.
-- Aprendemos o conceito de staging area.
+- Aprendemos a consultar git diff --staged.
+- Aprendemos o conceito de Working Directory.
+- Aprendemos o conceito de Staging Area.
 - Entendemos a função da pasta .git.
+- Aprendemos a descartar alterações com git restore.
+- Realizamos um ciclo completo: alteração → revisão → staging → revisão do staging → commit.
+- Criamos três commits no histórico do laboratório.
 
-## Commit de referência
+## Commits de referência
 
 4c63ef8 — chore: inicializa Laboratório de IA
 
-## O que estamos aprendendo agora
+6f19a03 — docs: adiciona memoria e documenta aprendizado do Git
 
-- Diferença entre Working Directory e Staging Area.
-- Diferença entre git diff e git diff --staged.
-- Como revisar alterações antes de criar um commit.
-- Como utilizar Git como ponto de segurança para experimentos com IA.
+39ba17 — docs: atualiza README sobre evolucao do Git
+
+## O que aprendemos
+
+O fluxo básico de trabalho com Git:
+
+lteração → git diff → git add → git diff --staged → git commit → git status
+
+Também aprendemos que:
+
+- git diff mostra alterações ainda fora da Staging Area.
+- git diff --staged mostra o que está preparado para o próximo commit.
+- git restore pode descartar alterações do Working Directory.
+- git status mostra a situação atual do repositório.
+- git log mostra o histórico de commits.
+- Um arquivo Untracked continua existindo no computador; apenas não está sendo acompanhado pelo Git.
+
+## Estado atual do repositório
+
+O Working Directory está limpo em relação aos arquivos rastreados.
+
+Existem dois arquivos derivados não rastreados:
+
+- documento PDF do aprendizado inicial do Git.
+- documento DOCX do aprendizado inicial do Git.
+
+Eles permanecem no computador e não fazem parte dos commits atuais.
 
 ## Memória do laboratório
 
 A memória foi organizada em três partes:
 
 - ESTADO-ATUAL.md — situação presente e próximo passo.
-- DECISOES.md — decisões importantes e seus motivos.
+- DECISOES.md — decisões estruturais e seus motivos.
 - SESSOES/ — histórico cronológico das sessões.
 
 ## Próximo passo
 
-Concluir o exercício de Git que demonstra o ciclo:
+Avançar para a utilização do Git no fluxo de trabalho do Claude Code.
 
-alteração → git diff → git add → git diff --staged → git commit
+Antes de permitir alterações significativas por um agente, compreenderemos:
 
-Depois disso, avançar para a integração do Git com o fluxo de trabalho do Claude Code.
+1. Como o Claude Code identifica o repositório.
+2. O que o agente consegue ler e modificar.
+3. Como revisar alterações feitas pelo agente com git diff.
+4. Como aceitar alterações com Git.
+5. Como rejeitar alterações com git restore.
+6. Como utilizar commits como pontos de segurança durante experimentos.
 
 ## Regra de continuidade
 
@@ -66,4 +99,5 @@ Ao iniciar uma nova sessão, consultar primeiro:
 O objetivo é recuperar rapidamente o contexto sem depender da memória da sessão anterior da API.
 
 ---
+
 *Estado mantido como referência operacional do Laboratório de IA.*
