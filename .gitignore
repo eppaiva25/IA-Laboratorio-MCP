@@ -1,0 +1,20 @@
+# Segredos e credenciais
+.env
+.env.*
+!.env.example
+
+# Chaves e certificados
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Diretórios de credenciais
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/

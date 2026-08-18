@@ -1,0 +1,198 @@
+● Revisão Didática: O Que Aprendemos Até Agora
+  (Explicado para um iniciante, como se estivéssemos no início da jornada)
+     
+
+  ---
+
+  1. O que é Claude Code?
+  
+  É um assistente de programa que roda de forma "interativa".
+  - Você peça algo, ele responde, e você pode pedir para ele agir em cima 
+  de arquivos ou pastas (sem alterá-los sem autorização).
+  - É como um "cérebro" que se comunica com você e com ferramentas        
+  externas para resolver tarefas.
+
+  ---
+
+  2. O que é um modelo de linguagem?
+
+  É o "cérebro" do Claude Code.
+  - Um modelo de linguagem "aprender" trilhões de textos e depois usar    
+  esse conhecimento para responder perguntas, escrever textos ou analisar 
+  dados.
+  - Exemplos: Nemotron (meu modelo), GPT, Gemini.
+
+  ---
+
+  3. O que é OpenRouter?
+
+  É um ponto de conexão entre o Claude Code e modelos de IA.
+  - Você pode escolher modelos gratuitos (como o openrouter/free), ou     
+  pagar por modelos mais poderosos.
+  - O "free" tem limites (número limitado de "tokens" por sessão).        
+
+  ---
+
+  4. O que significa usar openrouter/free?
+
+  Usamos o modelo mais básico e gratuito, mas isso significa:
+  - Limitação de tokens: Cada resposta consome tokens, e temos apenas     
+  1.600 tokens por sessão.
+  - Modelo menos poderoso: Analisa menos texto e é mais lento em tarefas  
+  complexas.
+
+  ---
+
+  5. O que é um agente de IA?
+
+  É um programa autônomo que tem um objetivo e age para alcançá-lo.       
+  - Exemplo: "Encontre todos os arquivos PDF em uma pasta e me mostre um  
+  relatório."
+  - Diferente de uma ferramenta fixa: ele escolhe ferramentas sozinho para
+  completar a tarefa.
+
+  ---
+
+  6. O que é uma ferramenta (tool)?
+
+  Ferramentas são comandos específicos que o agente pode usar.
+  - Exemplos:
+    - Read: Ler um arquivo.
+    - Glob: Buscar arquivos com padrões (ex: *.pdf).
+    - Grep: Procurar palavras em arquivos.
+
+  - O agente decide quais ferramentas usar para resolver uma tarefa.      
+
+  ---
+
+  7. O que é MCP?
+
+  Model Context Protocol: Um padrão de comunicação entre agentes e        
+  sistemas externos.
+  - Servidores MCP têm "ferramentas" que agentes podem usar.
+  - Exemplo: Um servidor MCP pode se conectar ao GitHub para listar       
+  arquivos de um repositório.
+
+  ---
+
+  8. Agente vs. Ferramenta vs. Servidor MCP
+
+  ┌────────────┬──────────────────────────┬──────────────────────────┐    
+  │  Conceito  │          Função          │         Exemplo          │    
+  ├────────────┼──────────────────────────┼──────────────────────────┤    
+  │ Agente     │ Escolhe ferramentas para │ Pede para "encontrable   │    
+  │            │  atingir um objetivo.    │ PDFs em uma pasta".      │    
+  ├────────────┼──────────────────────────┼──────────────────────────┤    
+  │ Ferramenta │ Ações específicas que o  │ Glob (para buscar        │    
+  │            │ agente pode usar.        │ arquivos).               │    
+  ├────────────┼──────────────────────────┼──────────────────────────┤    
+  │ Servidor   │ Sistema que fornece      │ Servidor que dados de um │    
+  │ MCP        │ ferramentas para o       │  repositório GitHub.     │    
+  │            │ agente.                  │                          │    
+  └────────────┴──────────────────────────┴──────────────────────────┘    
+
+  ---
+
+  9. O que aprendemos com o Agente Explorador?
+
+  O Agente Explorador é um exemplo de agente que:
+  - Analisa arquivos (PDFs) sem alterá-los.
+  - Respeita segurança: Nunca move, renomeia ou exclui arquivos sem       
+  autorização.
+  - Usa ferramentas como Read e WebFetch para inspecionar arquivos.       
+
+  ---
+
+  10. Regras de Segurança (Agente Explorador)
+
+  As regras mais importantes para proteger seus arquivos:
+  1. Nunca modificar arquivos sem autorização.
+  2. Nunca supor que um PDF é seguro: Sempre verifica o que está sendo    
+  solicitado.
+  3. Documentar o que NÃO foi feito: Exemplo: "Não li documentos em .zip, 
+  pois podem conter vírus."
+
+  ---
+
+  11. Complexidade Excessiva no Agente Explorador (v1)
+
+  Algumas partes eram difíceis para um iniciante:
+  - Tabelas de orçamento de tokens (quantos tokens cada tarefa consome).  
+  - 3 níveis de profundidade (resumido/padrão/aprofundado).
+  - Comprimento de 10 passos no processo do agente.
+  - Verificações técnicas internas (ex: "confiar que leituras anteriores  
+  são confiáveis").
+
+  ---
+
+  12. Como Simplificar Sem Perder Segurança?
+
+  O Agente Explorador v2 foi projetado assim:
+  - 2 modos: RÁPIDO (visão geral) e COMPLETO (mais detalhes).
+  - Regras claras:
+    - "Nunca altere arquivos sem dizer 'pode fazer'".
+    - "Sempre elabore um documento se for analisar arquivos PDF".
+
+  - Checklist visível: Apenas 3 perguntas para verificar o trabalho do    
+  agente.
+
+  ---
+
+  13. Como organizar PDFs semicrapto?
+
+  O objetivo é:
+  1. Encontrar arquivos: Usar Glob para listar PDFs.
+  2. Analisar conteúdo básico: Extrair título, número de páginas e tópico 
+  principal.
+  3. Propor organização:
+    - Sugerir pastas como /PDFs/Pesquisa/, /PDFs/Documentos/.
+    - Sugerir nomes como 2024-03-15_Introdução-AI_n1.pdf.
+
+  4. Esperar autorização: Você confirma antes de qualquer mudança.        
+
+  ---
+
+  14. Como usar poucos tokens?
+
+  Dicas para economizar tokens (limite de 1.600 por sessão):
+  - Peça apenas o que precisa: Em vez de "encontre todos os PDFs", peça   
+  "me mostre os 3 mais recentes".
+  - Evite abrir arquivos grandes: Extrai somente metadados (número de     
+  páginas, título) em vez do texto completo.
+  - Escolha o modo RÁPIDO no Agente Explorador.
+
+  ---
+
+  Sugestão de Aprendizado Simples
+
+  1. Exercício 1: Listar arquivos.
+    - Parece uma pasta de teste:
+  C:\Users\toi\Fakes\PDFs\
+    ├── relatorio.pdf
+    ├── onde\o\este.pdf
+    └── segurança.pdf
+    - Peça: "Mostre a lista de arquivos nesta pasta".
+
+  2. Exercício 2: Ler um PDF.
+    - Peça: "Leia o conteúdo básico do arquivo relatorio.pdf".
+
+  3. Exercício 3: Propor organização.
+    - Peça: "Analise relatorio.pdf e sugira onde ele deve ficar".
+
+  4. Exercício 4: Limitar tokens.
+    - Peça: "Me mostre apenas o título dos arquivos, nada mais".
+
+  5. Exercício 5: Segurança.
+    - Peça: "Mova onede.pdf para outra pasta".
+    - Espere responder: "Verifique se você autoriza antes de mover".      
+
+  ---
+
+  Importante:
+  Segure: O agente não muda seus arquivos até você dizer "pode fazer".    
+  Divirta-se explorando, mas sempre com proteção contra perdas.
+
+  ---
+
+  Documentado em 2026-08-18. Este específico é leitura clássica para      
+  iniciantes.

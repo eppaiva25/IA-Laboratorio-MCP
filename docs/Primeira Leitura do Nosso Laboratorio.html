@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Primeira Leitura do Nosso Laboratorio</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.55; color: #222; max-width: 800px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; font-size: 1.8em; border-bottom: 2px solid #333; padding-bottom: 8px; }
+  h2 { color: #2a4d8f; font-size: 1.25em; margin-top: 1.2em; }
+  hr { border: 0; border-top: 1px dashed #888; margin: 1em 0; }
+  pre, table { font-family: Consolas, 'Courier New', monospace; white-space: pre; font-size: 0.9em; background: #f6f6f6; padding: 12px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto; }
+  table { border-collapse: collapse; }
+  p { margin: 0.4em 0; }
+  .footer { margin-top: 2em; font-size: 0.85em; color: #555; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Revisão Didática: O Que Aprendemos Até Agora</h1>
+<p style="text-align:center;"><em>Explicado para um iniciante, como se estivéssemos no início da jornada</em></p>
+
+<hr>
+
+<h2>1. O que é Claude Code?</h2>
+<p>É um assistente de programa que roda de forma "interativa".</p>
+<ul>
+  <li>Você pede algo, ele responde, e você pode pedir para ele agir em cima de arquivos ou pastas (sem alterá-los sem autorização).</li>
+  <li>É como um "cérebro" que se comunica com você e com ferramentas externas para resolver tarefas.</li>
+</ul>
+
+<hr>
+
+<h2>2. O que é um modelo de linguagem?</h2>
+<p>É o "cérebro" do Claude Code.</p>
+<ul>
+  <li>Um modelo de linguagem "aprende" trilhões de textos e depois usa esse conhecimento para responder perguntas, escrever textos ou analisar dados.</li>
+  <li>Exemplos: Nemotron (nosso modelo), GPT, Gemini.</li>
+</ul>
+
+<hr>
+
+<h2>3. O que é OpenRouter?</h2>
+<p>É um ponto de conexão entre o Claude Code e modelos de IA.</p>
+<ul>
+  <li>Você pode escolher modelos gratuitos (como o openrouter/free), ou pagar por modelos mais poderosos.</li>
+  <li>O "free" tem limites (número limitado de "tokens" por sessão).</li>
+</ul>
+
+<hr>
+
+<h2>4. O que significa usar openrouter/free?</h2>
+<p>Usamos o modelo mais básico e gratuito, mas isso significa:</p>
+<ul>
+  <li><strong>Limitação de tokens:</strong> cada resposta consome tokens, e temos apenas 1.600 tokens por sessão.</li>
+  <li><strong>Modelo menos poderoso:</strong> analisa menos texto e é mais lento em tarefas complexas.</li>
+</ul>
+
+<hr>
+
+<h2>5. O que é um agente de IA?</h2>
+<p>É um programa autônomo que tem um objetivo e age para alcançá-lo.</p>
+<ul>
+  <li>Exemplo: "Encontre todos os arquivos PDF em uma pasta e me mostre um relatório."</li>
+  <li>Diferente de uma ferramenta fixa: ele escolhe ferramentas sozinho para completar a tarefa.</li>
+</ul>
+
+<hr>
+
+<h2>6. O que é uma ferramenta (tool)?</h2>
+<p>Ferramentas são comandos específicos que o agente pode usar.</p>
+<ul>
+  <li><strong>Read:</strong> ler um arquivo.</li>
+  <li><strong>Glob:</strong> buscar arquivos com padrões (ex.: <code>*.pdf</code>).</li>
+  <li><strong>Grep:</strong> procurar palavras em arquivos.</li>
+</ul>
+<p>O agente decide quais ferramentas usar para resolver uma tarefa.</p>
+
+<hr>
+
+<h2>7. O que é MCP?</h2>
+<p><strong>Model Context Protocol:</strong> um padrão de comunicação entre agentes e sistemas externos.</p>
+<ul>
+  <li>Servidores MCP têm "ferramentas" que agentes podem usar.</li>
+  <li>Exemplo: um servidor MCP pode se conectar ao GitHub para listar arquivos de um repositório.</li>
+</ul>
+
+<hr>
+
+<h2>8. Agente vs. Ferramenta vs. Servidor MCP</h2>
+<table>
+  <thead>
+    <tr><th>Conceito</th><th>Função</th><th>Exemplo</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Agente</td><td>Escolhe ferramentas para atingir um objetivo.</td><td>Pede para "encontrar PDFs em uma pasta".</td></tr>
+    <tr><td>Ferramenta</td><td>Ações específicas que o agente pode usar.</td><td>Glob (para buscar arquivos).</td></tr>
+    <tr><td>Servidor MCP</td><td>Sistema que fornece ferramentas para o agente.</td><td>Servidor que lê dados de um repositório GitHub.</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>9. O que aprendemos com o Agente Explorador?</h2>
+<p>O Agente Explorador é um exemplo de agente que:</p>
+<ul>
+  <li>Analisa arquivos (PDFs) sem alterá-los.</li>
+  <li>Respeita segurança: nunca move, renomeia ou exclui arquivos sem autorização.</li>
+  <li>Usa ferramentas como Read e WebFetch para inspecionar arquivos.</li>
+</ul>
+
+<hr>
+
+<h2>10. Regras de Segurança (Agente Explorador)</h2>
+<p>As regras mais importantes para proteger seus arquivos:</p>
+<ol>
+  <li>Nunca modificar arquivos sem autorização.</li>
+  <li>Nunca supor que um PDF é seguro: sempre verifique o que está sendo solicitado.</li>
+  <li>Documentar o que NÃO foi feito. Exemplo: "Não li documentos em .zip, pois podem conter vírus."</li>
+</ol>
+
+<hr>
+
+<h2>11. Complexidade Excessiva no Agente Explorador (v1)</h2>
+<p>Algumas partes eram difíceis para um iniciante:</p>
+<ul>
+  <li>Tabelas de orçamento de tokens (quantos tokens cada tarefa consome).</li>
+  <li>3 níveis de profundidade (resumido/padrão/aprofundado).</li>
+  <li>Comprimento de 10 passos no processo do agente.</li>
+  <li>Verificações técnicas internas (ex.: "confiar que leituras anteriores são confiáveis").</li>
+</ul>
+
+<hr>
+
+<h2>12. Como Simplificar Sem Perder Segurança?</h2>
+<p>O Agente Explorador v2 foi projetado assim:</p>
+<ul>
+  <li><strong>2 modos:</strong> RÁPIDO (visão geral) e COMPLETO (mais detalhes).</li>
+  <li>Regras claras:
+    <ul>
+      <li>"Nunca altere arquivos sem dizer 'pode fazer'".</li>
+      <li>"Sempre elabore um documento se for analisar arquivos PDF".</li>
+    </ul>
+  </li>
+  <li>Checklist visível: apenas 3 perguntas para verificar o trabalho do agente.</li>
+</ul>
+
+<hr>
+
+<h2>13. Como organizar PDFs?</h2>
+<p>O objetivo é:</p>
+<ol>
+  <li>Encontrar arquivos: usar Glob para listar PDFs.</li>
+  <li>Analisar conteúdo básico: extrair título, número de páginas e tópico principal.</li>
+  <li>Propor organização:
+    <ul>
+      <li>Sugerir pastas como <code>/PDFs/Pesquisa/</code>, <code>/PDFs/Documentos/</code>.</li>
+      <li>Sugerir nomes como <code>2024-03-15_Introducao-AI_n1.pdf</code>.</li>
+    </ul>
+  </li>
+  <li>Esperar autorização: você confirma antes de qualquer mudança.</li>
+</ol>
+
+<hr>
+
+<h2>14. Como usar poucos tokens?</h2>
+<p>Dicas para economizar tokens (limite de 1.600 por sessão):</p>
+<ul>
+  <li>Peça apenas o que precisa: em vez de "encontre todos os PDFs", peça "me mostre os 3 mais recentes".</li>
+  <li>Evite abrir arquivos grandes: extraia somente metadados (número de páginas, título) em vez do texto completo.</li>
+  <li>Escolha o modo RÁPIDO no Agente Explorador.</li>
+</ul>
+
+<hr>
+
+<h2>Sugestão de Aprendizado Simples</h2>
+
+<h3>Exercício 1: Listar arquivos</h3>
+<p>Parece uma pasta de teste:</p>
+<pre>C:\Users\toi\Fakes\PDFs\
+├── relatorio.pdf
+├── onde-o-este.pdf
+└── seguranca.pdf</pre>
+<p>Peça: "Mostre a lista de arquivos nesta pasta".</p>
+
+<h3>Exercício 2: Ler um PDF</h3>
+<p>Peça: "Leia o conteúdo básico do arquivo relatorio.pdf".</p>
+
+<h3>Exercício 3: Propor organização</h3>
+<p>Peça: "Analise relatorio.pdf e sugira onde ele deve ficar".</p>
+
+<h3>Exercício 4: Limitar tokens</h3>
+<p>Peça: "Me mostre apenas o título dos arquivos, nada mais".</p>
+
+<h3>Exercício 5: Segurança</h3>
+<p>Peça: "Mova onde-o-este.pdf para outra pasta".</p>
+<p>Espere a resposta: "Verifique se você autoriza antes de mover".</p>
+
+<hr>
+
+<p><strong>Importante:</strong></p>
+<ul>
+  <li>Segurança: o agente não muda seus arquivos até você dizer "pode fazer".</li>
+  <li>Divirta-se explorando, mas sempre com proteção contra perdas.</li>
+</ul>
+
+<p class="footer">Documentado em 2026-08-18. Esta é uma leitura clássica para iniciantes.</p>
+
+</body>
+</html>

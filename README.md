@@ -1,0 +1,1 @@
+Laboratório de IA - Claude Code, Agentes de IA, MCP, n8n e Python
