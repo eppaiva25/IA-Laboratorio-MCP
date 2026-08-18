@@ -1,6 +1,6 @@
 # Estado Atual — Laboratório de IA
 
-**Última atualização:** 18/08/2026
+**Última atualização:** 18/08/2026 (etapa Claude Code + Git)
 
 ## Objetivo
 
@@ -38,6 +38,16 @@ V:\Claude Code\Laboratorio-IA
 - Aprendemos a registrar exclusões no histórico com git add -u seguido de git commit.
 - Definimos Markdown (.md) como formato principal da documentação.
 - Removemos do repositório formatos derivados que não precisam ser mantidos como fonte oficial.
+- Claude Code foi executado dentro do repositório V:\Claude Code\Laboratorio-IA.
+- O Claude Code identificou o diretório como um repositório Git local.
+- Aprendemos que o agente pode ler e modificar arquivos do projeto quando autorizado.
+- Fizemos uma alteração controlada no README.md a partir do Claude Code.
+- Usamos git diff para revisar a alteração ainda no Working Directory.
+- Usamos git add para colocar a alteração na Staging Area.
+- Usamos git diff --staged para revisar novamente antes do commit.
+- Criamos o commit dd9b69d com a mensagem "docs: atualiza README sobre Claude Code e Git".
+- Confirmamos com git status que o Working Directory voltou a ficar limpo após o commit.
+- Consolidamos o princípio de que o Git funciona como camada de segurança e revisão para alterações realizadas por agentes de IA.
 
 ## Commits de referência
 
@@ -50,6 +60,10 @@ V:\Claude Code\Laboratorio-IA
 ec4d3f — docs: atualiza estado do laboratorio
 
 33f5ec2 — docs: remove formatos derivados da documentacao
+
+d2ac5ba — docs: consolida memoria da etapa Git
+
+dd9b69d — docs: atualiza README sobre Claude Code e Git
 
 ## O que aprendemos
 
@@ -68,6 +82,10 @@ Também aprendemos que:
 - Um arquivo Untracked continua existindo no computador, mas não está sendo acompanhado pelo Git.
 - Uma exclusão de arquivo versionado precisa ser registrada em um commit para fazer parte do histórico atual.
 - O histórico do Git preserva os estados anteriores, mesmo depois que arquivos são removidos da versão atual.
+- O Claude Code identifica o repositório a partir do diretório de trabalho e opera sobre os arquivos do projeto.
+- Quando autorizado, o Claude Code consegue ler e modificar arquivos do Working Directory.
+- O fluxo "alteração → git diff → git add → git diff --staged → git commit → git status" continua valendo quando a alteração é feita por um agente.
+- O Git funciona como camada de segurança e revisão para alterações realizadas por agentes de IA: cada commit pode servir como ponto de retorno.
 
 ## Organização da documentação
 
@@ -81,7 +99,7 @@ O Working Directory está limpo.
 
 Último commit:
 
-33f5ec2 — docs: remove formatos derivados da documentacao
+dd9b69d — docs: atualiza README sobre Claude Code e Git
 
 ## Memória do laboratório
 
@@ -93,16 +111,16 @@ A memória foi organizada em três partes:
 
 ## Próximo passo
 
-Avançar para a utilização do Git no fluxo de trabalho do Claude Code.
+Praticar a rejeição de uma alteração feita por um agente de IA usando `git restore`.
 
-Antes de permitir alterações significativas por um agente, compreenderemos:
+O objetivo é consolidar o outro lado do fluxo de revisão: nem toda alteração precisa ser aceita — precisamos saber voltar atrás com segurança.
 
-1. Como o Claude Code identifica o repositório.
-2. O que o agente consegue ler e modificar.
-3. Como revisar alterações feitas pelo agente com git diff.
-4. Como aceitar alterações com Git.
-5. Como rejeitar alterações com git restore.
-6. Como utilizar commits como pontos de segurança durante experimentos.
+Após esse exercício, considerar:
+
+1. Praticar o ciclo completo de aceitação e rejeição várias vezes em arquivos diferentes.
+2. Experimentar alterações em mais de um arquivo antes de um único commit.
+3. Evoluir para alterações que envolvam criação e exclusão de arquivos.
+4. Preparar o terreno para a próxima etapa do laboratório (Claude Code em conjunto com MCP, n8n ou Python).
 
 ## Regra de continuidade
 
