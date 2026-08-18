@@ -8,7 +8,7 @@ Construir um laboratório prático para aprender e experimentar Claude Code, age
 
 ## Onde estamos
 
-Estamos aprendendo a utilizar Git como controle de versões e como mecanismo de memória persistente do laboratório.
+Estamos utilizando Git como controle de versões e como mecanismo de memória persistente do laboratório.
 
 O repositório Git local está em:
 
@@ -30,8 +30,14 @@ V:\Claude Code\Laboratorio-IA
 - Aprendemos o conceito de Staging Area.
 - Entendemos a função da pasta .git.
 - Aprendemos a descartar alterações com git restore.
-- Realizamos um ciclo completo: alteração → revisão → staging → revisão do staging → commit.
-- Criamos três commits no histórico do laboratório.
+- Aprendemos a preparar alterações e exclusões com git add e git add -u.
+- Aprendemos a revisar alterações antes do commit.
+- Realizamos ciclos completos de alteração, revisão, staging e commit.
+- Aprendemos que arquivos Untracked não fazem parte do histórico até serem adicionados.
+- Aprendemos que arquivos já versionados, quando removidos, aparecem como deleted.
+- Aprendemos a registrar exclusões no histórico com git add -u seguido de git commit.
+- Definimos Markdown (.md) como formato principal da documentação.
+- Removemos do repositório formatos derivados que não precisam ser mantidos como fonte oficial.
 
 ## Commits de referência
 
@@ -40,6 +46,10 @@ V:\Claude Code\Laboratorio-IA
 6f19a03 — docs: adiciona memoria e documenta aprendizado do Git
 
 39ba17 — docs: atualiza README sobre evolucao do Git
+
+ec4d3f — docs: atualiza estado do laboratorio
+
+33f5ec2 — docs: remove formatos derivados da documentacao
 
 ## O que aprendemos
 
@@ -54,18 +64,24 @@ Também aprendemos que:
 - git restore pode descartar alterações do Working Directory.
 - git status mostra a situação atual do repositório.
 - git log mostra o histórico de commits.
-- Um arquivo Untracked continua existindo no computador; apenas não está sendo acompanhado pelo Git.
+- git add -u prepara alterações e exclusões de arquivos já rastreados.
+- Um arquivo Untracked continua existindo no computador, mas não está sendo acompanhado pelo Git.
+- Uma exclusão de arquivo versionado precisa ser registrada em um commit para fazer parte do histórico atual.
+- O histórico do Git preserva os estados anteriores, mesmo depois que arquivos são removidos da versão atual.
+
+## Organização da documentação
+
+O Markdown (.md) é a fonte oficial da documentação do laboratório.
+
+PDF, DOCX, HTML e TXT podem ser gerados posteriormente quando houver necessidade de impressão, compartilhamento ou apresentação, mas não são mantidos como fontes paralelas dentro do repositório.
 
 ## Estado atual do repositório
 
-O Working Directory está limpo em relação aos arquivos rastreados.
+O Working Directory está limpo.
 
-Existem dois arquivos derivados não rastreados:
+Último commit:
 
-- documento PDF do aprendizado inicial do Git.
-- documento DOCX do aprendizado inicial do Git.
-
-Eles permanecem no computador e não fazem parte dos commits atuais.
+33f5ec2 — docs: remove formatos derivados da documentacao
 
 ## Memória do laboratório
 
