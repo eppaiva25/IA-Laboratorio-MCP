@@ -81,4 +81,27 @@ Ao iniciar uma nova sessão de trabalho, a primeira referência deverá ser a me
 Sessões de API podem terminar e o contexto conversacional pode não estar disponível posteriormente. A memória armazenada no próprio laboratório permite recuperar o estado do projeto de forma independente da sessão anterior.
 
 ---
+
+## 2026-08-19 — Arquitetura de execução de modelos
+
+### Decisão
+
+Três caminhos para execução de modelos foram considerados: OpenRouter, Ollama Cloud e Ollama Local.
+
+- **OpenRouter** está configurado no Claude Code através do loader PowerShell e foi testado com `openrouter/free` — funcionamento confirmado.
+- **Ollama Local** está disponível em `localhost:11434` com os modelos `gemma4:26b`, `gemma4:12b` e `4skl/gemma4-e4b-mtp:latest` — funcionamento confirmado via `ollama run`.
+- **Ollama Cloud** já foi utilizado anteriormente com `minimax/m3:cloud`, mas sua integração com o Claude Code não está documentada como funcional. Em teste anterior houve HTTP 429 devido ao limite semanal da conta. Endpoint, token e secret store **não** são configurações confirmadas.
+
+Não existe atualmente um mecanismo unificado de alternância. OpenRouter é executado através do loader PowerShell e os modelos locais podem ser executados diretamente com `ollama run`.
+
+A questão de preservar o contexto/memória ao trocar de backend ainda está em investigação.
+
+A fonte persistente de documentação do projeto é `V:\Claude Code\Laboratorio-IA`. A documentação detalhada sobre os backends e comandos de diagnóstico está em `memoria/EXECUCAO-ARQUITETURA.md`.
+
+### Motivo
+
+Registrar a arquitetura atual de execução de modelos, distinguindo o que foi testado e confirmado do que ainda é apenas considerado, e deixar explícito que a alternância entre backends será objeto de estudo futuro.
+
+---
+
 *Registro permanente das decisões estruturais do Laboratório de IA.*
