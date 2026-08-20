@@ -29,7 +29,7 @@ graph LR
 
 | Backend | Tipo | Endpoint base | Chave de acesso | Observações |
 |---------|------|--------------|----------------|-------------|
-| **OpenRouter** | API pública (gratuita) | `https://openrouter.ai/api` | API‑Key armazenada em `$env:USERPROFILE\.openrouter\key.sec` (DPAPI/SecureString), **nunca escrita em texto puro** | Loader PowerShell injeta temporariamente as variáveis e limpa após a execução do Claude Code. Testado: `openrouter/free` → `OPENROUTER FREE OK`. |
+| **OpenRouter** | API pública (gratuita) | `https://openrouter.ai/api` | API‑Key armazenada em `$env:USERPROFILE\.openrouter\key.sec` (DPAPI/SecureString), **nunca escrita em texto puro** | Loader PowerShell injeta temporariamente as variáveis e limpa após a execução do Claude Code. Testado: `openrouter/free` → `CLAUDE CODE + OPENROUTER FREE OK`; chave nova validada na API em 20/08/2026. |
 | **Ollama Cloud** | Serviço SaaS pago | Endpoint: não documentado neste momento | **Não documentado** — não há configuração de token/secret store nos arquivos atuais (regra do usuário). | Conta com créditos/limite semanal. Em teste anterior recebeu HTTP 429 indicando limite atingido. Já usou `minimax/m3:cloud` via essa via. |
 | **Ollama Local** | Execução local | `http://127.0.0.1:11434/api/` | Nenhuma (modelo já instalado) | Ideal para testes offline. Três modelos confirmados localmente (ver seção de comandos). |
 
@@ -84,37 +84,68 @@ Executável confirmado:
 C:\Users\lenovo\.local\bin\claude.exe
 ```
 
-### Verificação do cofre OpenRouter
+### Cofre DPAPI da chave OpenRouter
+
+Local do cofre: `%USERPROFILE%\.openrouter\key.sec` (SecureString criptografada via DPAPI, vinculada ao usuário/máquina).
+Backup da chave anterior: `key.sec.bak-antes-nova-chave` (criado antes da rotação de 20/08/2026).
+
+Verificações confirmadas:
 
 ```powershell
 Test-Path "$env:USERPROFILE\.openrouter\key.sec"
-```
-
-Resultado confirmado:
-
-```text
-True
-```
-
-Também regista-se que foi criado o backup:
-
-```powershell
 Test-Path "$env:USERPROFILE\.openrouter\key.sec.bak-antes-nova-chave"
 ```
 
-Resultado confirmado:
+Resultado confirmado: `True` para ambos.
 
-```text
-True
-```
-
-**Não documente a chave** ou seu conteúdo.
-
-### Verificação do loader OpenRouter
+Leitura segura do cofre (apenas metadados — nunca imprimir a chave):
 
 ```powershell
-claude --version
+$sec  = Get-Content "$env:USERPROFILE\.openrouter\key.sec" | ConvertTo-SecureString
+$cred = New-Object System.Management.Automation.PSCredential("openrouter", $sec)
+$b    = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($cred.Password)
+$key  = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($b)
+"len=$($key.Length); formato=$($key.StartsWith('sk-or-'))"
+[System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b)
 ```
+
+Resultado confirmado: `len=73; formato=True`.
+
+**Não registrar nem exibir a chave** ou qualquer fragmento dela.
+
+### Validação da nova chave na API (20/08/2026)
+
+Com `$key` apenas em memória:
+
+```powershell
+Invoke-RestMethod "https://openrouter.ai/api/v1/models"
+Invoke-RestMethod "https://openrouter.ai/api/v1/key" -Headers @{ Authorization = "Bearer $key" }
+Invoke-RestMethod "https://openrouter.ai/api/v1/chat/completions" -Method Post `
+  -Headers @{ Authorization = "Bearer $key" } -ContentType "application/json" `
+  -Body (@{ model = "anthropic/claude-haiku-4.5"; max_tokens = 1000;
+            messages = @(@{ role = "user"; content = "Responda apenas: HAIKU OK" }) } | ConvertTo-Json -Depth 5)
+```
+
+Resultados confirmados:
+
+- `/api/v1/models` → HTTP 200, catálogo retornado.
+- `/api/v1/key` → HTTP 200, chave ativa confirmada.
+- Chat completion com `anthropic/claude-haiku-4.5`, `max_tokens=1000` → resposta OK.
+- Uso e custo retornados pela API: prompt_tokens = 20, completion_tokens = 11,
+  total_tokens = 31, cost = 0.000075 USD.
+
+### Wrapper Start-ClaudeCode (perfil PowerShell)
+
+- Definido no perfil PowerShell (`D:\Usuario\Documentos\PowerShell\Microsoft.PowerShell_profile.ps1`), alias global `claude` → `Start-ClaudeCode`.
+- Resolve o binário com `Get-Command -CommandType Application claude` → `C:\Users\lenovo\.local\bin\claude.exe`.
+- Descriptografa o cofre sob demanda e define, somente durante a execução:
+  - `OPENROUTER_API_KEY` = chave descriptografada
+  - `ANTHROPIC_AUTH_TOKEN` = chave descriptografada
+  - `ANTHROPIC_BASE_URL` = `https://openrouter.ai/api`
+  - `ANTHROPIC_API_KEY` = vazia (evita conflito com outra credencial)
+  - `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` = `1`
+- No bloco `finally`: remove as cinco variáveis do processo, libera o BSTR (`ZeroFreeBSTR`) e força coleta de lixo.
+- O segredo vive somente no cofre DPAPI, fora do repositório.
 
 Quando o loader está funcionando, aparece uma mensagem equivalente a:
 
@@ -124,7 +155,7 @@ Quando o loader está funcionando, aparece uma mensagem equivalente a:
 
 **Não registrar a chave** ou seu conteúdo.
 
-### Teste OpenRouter Free
+### Teste final
 
 ```powershell
 claude --model openrouter/free
@@ -133,14 +164,16 @@ claude --model openrouter/free
 Teste:
 
 ```text
-Responda apenas: OPENROUTER FREE OK
+Responda apenas: CLAUDE CODE + OPENROUTER FREE OK
 ```
 
 Resultado confirmado:
 
 ```text
-OPENROUTER FREE OK
+CLAUDE CODE + OPENROUTER FREE OK
 ```
+
+O aviso de que `openrouter/free` não é um modelo reconhecido internamente pelo Claude Code é esperado (modelo de gateway) e não impede a execução.
 
 **Histórico de diagnóstico:** tentou-se também:
 
@@ -149,6 +182,15 @@ minimax/minimax-m2.5:free
 ```
 
 Esse identificador **não foi aceito** pelo Claude Code/OpenRouter no nosso teste, enquanto `openrouter/free` funcionou.
+
+### Problemas e soluções (histórico de diagnóstico)
+
+| Sintoma | Causa | Solução |
+|---------|-------|---------|
+| `401 Missing Authentication header` | Requisição sem o cabeçalho `Authorization` (quoting do `curl.exe` no PowerShell) | `Invoke-RestMethod` com `Headers @{ Authorization = "Bearer $key" }` |
+| Falha de autenticação com a chave anterior | A chave anterior apresentou falha de autenticação; foi realizada rotação para uma nova chave, que foi validada com sucesso (as duas têm o mesmo formato: 73 caracteres, prefixo `sk-or-`) | Rotação registrada no cofre DPAPI com backup prévio |
+| `402` no teste do modelo | Limite de créditos associado ao `max_tokens` solicitado | Teste repetido com `max_tokens=1000` → sucesso |
+| Aviso: `openrouter/free` não reconhecido internamente | Modelo de gateway, não nativo do CLI | Esperado; execução funciona |
 
 ### Diagnóstico das variáveis de ambiente
 
@@ -201,4 +243,4 @@ Separar concepualmente três camadas:
 
 ---
 
-*Este documento será mantido em sincronia com o repositório de memória (`MEMORY.md`) e com `DECISOES.md` para garantir rastreabilidade de decisões arquiteturais e de execução.*
+*Este documento será mantido em sincronia com `DECISOES.md`, `ESTADO-ATUAL.md` e os registros em `SESSOES/` para garantir rastreabilidade de decisões arquiteturais e de execução.*

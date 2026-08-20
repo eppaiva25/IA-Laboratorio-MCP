@@ -104,4 +104,38 @@ Registrar a arquitetura atual de execução de modelos, distinguindo o que foi t
 
 ---
 
+## 2026-08-20 — Segredos fora do repositório: DPAPI + wrapper
+
+### Decisão
+
+Chaves de API (OpenRouter) ficam exclusivamente em cofre DPAPI
+(`%USERPROFILE%\.openrouter\key.sec`), carregadas sob demanda pelo wrapper
+`Start-ClaudeCode` no perfil PowerShell, que define variáveis de ambiente
+apenas durante a execução e as remove ao finalizar. O repositório nunca contém
+a chave, nem em texto puro, nem criptografada.
+
+### Motivo
+
+DPAPI vincula o segredo ao usuário/máquina; o wrapper garante que o segredo
+exista em memória somente enquanto o Claude Code roda; o Git permanece como
+camada de segurança sem nunca versionar credenciais.
+
+---
+
+## 2026-08-20 — Duas frentes de execução de modelos
+
+### Decisão
+
+O laboratório opera duas frentes independentes e já validadas:
+(1) OpenCode → 9Router → provedores (combo ProjetoLab);
+(2) Claude Code → OpenRouter → `openrouter/free` via wrapper `Start-ClaudeCode`.
+
+### Motivo
+
+Separar o ecossistema OpenCode (agentes/multi-provider) do uso direto do
+Claude Code com gateway OpenRouter permite validar cada caminho isoladamente
+antes de estudar alternância unificada entre backends.
+
+---
+
 *Registro permanente das decisões estruturais do Laboratório de IA.*

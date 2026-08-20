@@ -1,6 +1,6 @@
 # Estado Atual — Laboratório de IA
 
-**Última atualização:** 19/08/2026 (etapa arquitetura de agentes IA)
+**Última atualização:** 20/08/2026 (nova chave OpenRouter + validação Claude Code)
 
 ## Objetivo
 
@@ -8,18 +8,24 @@ Construir um laboratório prático para aprender e experimentar Claude Code, age
 
 ## Onde estamos
 
-Evoluímos da etapa de Git para arquitetura de agentes IA com múltiplos provedores configurados e validados.
+Evoluímos da etapa de Git para arquitetura de agentes IA com duas frentes de execução de modelos configuradas e validadas.
 
 O repositório Git local está em:
 
 V:\Claude Code\Laboratorio-IA
 
-Arquitetura atual validada:
+Frente 1 — OpenCode → 9Router → provedores:
 - **OpenCode:** 1.18.18
 - **Provedores locais:** Ollama (gemma4:12b, gemma4:26b, 4skl/gemma4-e4b-mtp:latest)
 - **Provedores cloud:** OpenCode Free (opencode/mimo-v2.5-free) + 9Router
 - **9Router:** v0.5.55 rodando em http://localhost:20128
 - **ProjetoLab:** combo disponível via 9Router, testado com sucesso
+
+Frente 2 — Claude Code → OpenRouter → `openrouter/free`:
+- **Cofre DPAPI:** chave OpenRouter em `%USERPROFILE%\.openrouter\key.sec`, com backup prévio à rotação (`key.sec.bak-antes-nova-chave`)
+- **Nova chave validada em 20/08/2026:** formato (73 caracteres, prefixo `sk-or-`), `/api/v1/models`, `/api/v1/key` e teste direto de `anthropic/claude-haiku-4.5` com `max_tokens=1000` (uso e custo retornados pela API registrados na sessão do dia)
+- **Wrapper `Start-ClaudeCode`:** injeta as variáveis apenas durante a execução e as limpa ao finalizar
+- **Validação final:** `claude --model openrouter/free` → `CLAUDE CODE + OPENROUTER FREE OK`
 
 ## Já concluído
 
@@ -75,6 +81,11 @@ Arquitetura atual validada:
 - Validamos modelos locais mas identificamos que são lentos no hardware atual.
 - Definimos estratégia: cloud (mimo-v2.5-free + 9Router) será priorizado para desenvolvimento de agentes; Ollama mantido para testes locais.
 - Estratégia de combo ProjetoLab ainda será avaliada entre Fallback, Round Robin e Fusion.
+- Rotacionamos a chave OpenRouter no cofre DPAPI com backup prévio à troca.
+- Validamos a nova chave OpenRouter: comprimento/formato, /api/v1/models e /api/v1/key.
+- Testamos anthropic/claude-haiku-4.5 com max_tokens=1000 com sucesso, registrando o uso e o custo retornados pela API.
+- Superamos os problemas 401 (header de autenticação ausente), 402 (limite de max_tokens) e o aviso esperado sobre openrouter/free não reconhecido internamente.
+- Confirmamos o fluxo completo: claude --model openrouter/free → CLAUDE CODE + OPENROUTER FREE OK.
 
 ## Commits de referência
 
@@ -91,6 +102,8 @@ Arquitetura atual validada:
 d2ac5ba — docs: consolida memoria da etapa Git
 
 dd9b69d — docs: atualiza README sobre Claude Code e Git
+
+3965af5 — Atualizar estado atual: arquitetura IA com Ollama, OpenCode e 9Router validada
 
 ## O que aprendemos
 
@@ -126,11 +139,11 @@ PDF, DOCX, HTML e TXT podem ser gerados posteriormente quando houver necessidade
 
 ## Estado atual do repositório
 
-O Working Directory está limpo.
+Não há alterações pendentes em arquivos rastreados. Pendência de decisão: app.py, opencode.json e opencode.json.backup estão untracked e serão analisados separadamente.
 
 Último commit:
 
-dd9b69d — docs: atualiza README sobre Claude Code e Git
+3965af5 — Atualizar estado atual: arquitetura IA com Ollama, OpenCode e 9Router validada
 
 ## Memória do laboratório
 
@@ -142,18 +155,12 @@ A memória foi organizada em três partes:
 
 ## Próximo passo
 
-Avaliar e definir estratégia de combo ProjetoLab entre:
-1. **Fallback** — tentar primeiro cloud, falhar para local se indisponível
-2. **Round Robin** — alternar entre cloud e local em cada requisição
-3. **Fusion** — combinar respostas de múltiplos provedores
-
-Após decidir estratégia, considerar:
-
-1. Testar cenários de falha e recuperação com a arquitetura atual.
-2. Otimizar configuração de hardware ou explorar alternativas para modelos locais.
-3. Documentar padrões de uso e recomendações de provider por tipo de tarefa.
-4. Integrar agentes práticos (MCP, n8n, Python) com arquitetura validada.
-5. Preparar pipeline de validação automatizada para garantir disponibilidade de provedores.
+1. Decidir o destino dos arquivos untracked (app.py, opencode.json, opencode.json.backup) — análise separada.
+2. Retomar a avaliação da estratégia de combo ProjetoLab entre:
+   - **Fallback** — tentar primeiro cloud, falhar para local se indisponível
+   - **Round Robin** — alternar entre cloud e local em cada requisição
+   - **Fusion** — combinar respostas de múltiplos provedores
+3. Usar a frente Claude Code → OpenRouter no dia a dia via `Start-ClaudeCode` — a frente está pronta para uso diário.
 
 ## Regra de continuidade
 
