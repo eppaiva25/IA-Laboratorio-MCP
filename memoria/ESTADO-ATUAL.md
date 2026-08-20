@@ -1,6 +1,6 @@
 # Estado Atual — Laboratório de IA
 
-**Última atualização:** 18/08/2026 (etapa Claude Code + Git)
+**Última atualização:** 19/08/2026 (etapa arquitetura de agentes IA)
 
 ## Objetivo
 
@@ -8,11 +8,18 @@ Construir um laboratório prático para aprender e experimentar Claude Code, age
 
 ## Onde estamos
 
-Estamos utilizando Git como controle de versões e como mecanismo de memória persistente do laboratório.
+Evoluímos da etapa de Git para arquitetura de agentes IA com múltiplos provedores configurados e validados.
 
 O repositório Git local está em:
 
 V:\Claude Code\Laboratorio-IA
+
+Arquitetura atual validada:
+- **OpenCode:** 1.18.18
+- **Provedores locais:** Ollama (gemma4:12b, gemma4:26b, 4skl/gemma4-e4b-mtp:latest)
+- **Provedores cloud:** OpenCode Free (opencode/mimo-v2.5-free) + 9Router
+- **9Router:** v0.5.55 rodando em http://localhost:20128
+- **ProjetoLab:** combo disponível via 9Router, testado com sucesso
 
 ## Já concluído
 
@@ -56,6 +63,18 @@ V:\Claude Code\Laboratorio-IA
 - Confirmamos com `git diff -- README.md` que não havia mais nenhuma diferença em relação ao último commit.
 - Consolidamos a diferença entre aceitar uma alteração (`git add` → `git diff --staged` → `git commit`) e rejeitar uma alteração (`git restore`).
 - Entendemos que `git restore` neste exercício descartou uma alteração ainda não commitada, voltando o arquivo ao estado do último commit.
+- Configuramos arquitetura de agentes IA com OpenCode 1.18.18.
+- Instalamos Ollama localmente com três modelos: gemma4:12b, gemma4:26b e 4skl/gemma4-e4b-mtp:latest.
+- Configuramos OpenCode Free com opencode/mimo-v2.5-free como provider cloud.
+- Instalamos e validamos 9Router v0.5.55 em http://localhost:20128.
+- Configuramos provider 9router no opencode.json usando http://127.0.0.1:20128/v1.
+- Ativamos autenticação do 9Router através do mecanismo de credenciais do OpenCode.
+- Disponibilizamos combo ProjetoLab como 9router/ProjetoLab.
+- Testamos ProjetoLab com sucesso usando prompts de validação ('Responda apenas: PROJETOLAB + 9ROUTER + OPENCODE OK' e 'Responda apenas OK').
+- Verificamos no painel do 9Router que chamadas foram feitas para claude-haiku-4.5.
+- Validamos modelos locais mas identificamos que são lentos no hardware atual.
+- Definimos estratégia: cloud (mimo-v2.5-free + 9Router) será priorizado para desenvolvimento de agentes; Ollama mantido para testes locais.
+- Estratégia de combo ProjetoLab ainda será avaliada entre Fallback, Round Robin e Fusion.
 
 ## Commits de referência
 
@@ -123,15 +142,18 @@ A memória foi organizada em três partes:
 
 ## Próximo passo
 
-Aprofundar a prática combinada dos dois caminhos de revisão: aceitar e rejeitar alterações feitas por agentes de IA.
+Avaliar e definir estratégia de combo ProjetoLab entre:
+1. **Fallback** — tentar primeiro cloud, falhar para local se indisponível
+2. **Round Robin** — alternar entre cloud e local em cada requisição
+3. **Fusion** — combinar respostas de múltiplos provedores
 
-Após consolidar essa etapa, considerar:
+Após decidir estratégia, considerar:
 
-1. Repetir o ciclo de aceitação em um arquivo e o ciclo de rejeição em outro, na mesma sessão.
-2. Experimentar `git restore --staged <arquivo>` para tirar uma alteração da Staging Area sem perdê-la.
-3. Treinar alterações em múltiplos arquivos antes de um único commit e revisar o diff consolidado.
-4. Evoluir para cenários que envolvam criação e exclusão de arquivos.
-5. Preparar o terreno para a próxima etapa do laboratório (Claude Code em conjunto com MCP, n8n ou Python).
+1. Testar cenários de falha e recuperação com a arquitetura atual.
+2. Otimizar configuração de hardware ou explorar alternativas para modelos locais.
+3. Documentar padrões de uso e recomendações de provider por tipo de tarefa.
+4. Integrar agentes práticos (MCP, n8n, Python) com arquitetura validada.
+5. Preparar pipeline de validação automatizada para garantir disponibilidade de provedores.
 
 ## Regra de continuidade
 
