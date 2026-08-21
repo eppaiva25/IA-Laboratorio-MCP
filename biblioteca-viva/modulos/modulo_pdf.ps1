@@ -99,3 +99,56 @@ function Invoke-BvAnalise {
         AmostraConteudo = ''
     }
 }
+
+function Invoke-BvExtracao {
+    param([Parameter(Mandatory)][string]$Caminho)
+
+    if (-not (Test-Path -LiteralPath $Caminho -PathType Leaf)) {
+        throw "Arquivo nao encontrado: $Caminho"
+    }
+
+    $scriptPonte = Join-Path $PSScriptRoot '..\externo\extrator_pdf.py'
+    $arquivoTemp = [IO.Path]::GetTempFileName()
+
+    try {
+        $saidaBruta = & python $scriptPonte $Caminho $arquivoTemp 2>&1
+        $json = $null
+        try { $json = ($saidaBruta | Out-String).Trim() | ConvertFrom-Json } catch { }
+
+        if ($null -eq $json) {
+            return [pscustomobject]@{
+                Ok = $false; Texto = ''; Caracteres = 0; Paginas = 0
+                PrecisaOcr = $false; PrecisaSenha = $false
+                Observacoes = @('ponte_python_falhou')
+            }
+        }
+
+        $observacoes = @($json.observacoes)
+        $texto = ''
+        if ($json.ok -and (Test-Path -LiteralPath $arquivoTemp)) {
+            $texto = Get-Content -LiteralPath $arquivoTemp -Raw
+        }
+
+        return [pscustomobject]@{
+            Ok           = [bool]$json.ok
+            Texto        = $texto
+            Caracteres   = [int]$json.caracteres
+            Paginas      = [int]$json.paginas
+            PrecisaOcr   = ($observacoes -contains 'texto_insuficiente')
+            PrecisaSenha = ($observacoes -contains 'precisa_senha')
+            Observacoes  = $observacoes
+        }
+    }
+    catch {
+        return [pscustomobject]@{
+            Ok = $false; Texto = ''; Caracteres = 0; Paginas = 0
+            PrecisaOcr = $false; PrecisaSenha = $false
+            Observacoes = @("erro:$($_.Exception.Message)")
+        }
+    }
+    finally {
+        if (Test-Path -LiteralPath $arquivoTemp) {
+            Remove-Item -LiteralPath $arquivoTemp -Force -ErrorAction SilentlyContinue
+        }
+    }
+}

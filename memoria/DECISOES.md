@@ -222,4 +222,92 @@ próximos módulos replicarão.
 
 ---
 
+## 2026-08-21 — Biblioteca Viva: arquitetura da Fase C (extração de conteúdo e classificação com IA)
+
+### Decisão
+
+A Fase C separa o conhecimento sobre os arquivos em três camadas, com zonas de escrita
+exclusivas, sem alterar o esquema v1 do catálogo:
+
+1. **Camada técnica** (Fases A/B) — colunas estruturais do catálogo; a IA NUNCA escreve nelas.
+2. **Camada de conteúdo** (nova) — texto extraído em sidecars `dados/extracoes/<id>.txt|.json`,
+   regenerável, nunca dentro do CSV; `<id>` deriva do hash (estável entre movimentos).
+3. **Camada semântica** (nova) — colunas `categoria/confianca/motivo/classificado_por/modelo/
+   lote/processado_em` + histórico append-only em `dados/classificacoes/lote-*.jsonl`;
+   ÚNICA área escrita pela IA; sobrescrita em reclassificação é legítima porque o histórico
+   preserva todas as respostas anteriores.
+
+Componentes aprovados: `externo/extrator_pdf.py` (ponte pypdf, 1 arquivo por chamada),
+`nucleo/extrator.ps1` (cache por sha256 + sidecars), `Invoke-BvExtracao` como capacidade nova
+dos módulos (mesma mecânica de roteamento da análise), `nucleo/classificador.ps1` (agnóstico
+de extensão: prompt, chamada, validação, gravação pela porta única com verificação de
+imutabilidade das colunas técnicas).
+
+Contrato da resposta da IA (JSON estrito): `categoria` ∈ taxonomia fechada de 9 categorias
+(`financeiro, documento_pessoal, automotivo, academico_tecnico, manual_produto, religioso,
+correspondencia, digitalizado_diverso, outro`), `confianca` 0–1, `motivo` obrigatório;
+inválido = 1 retry; persistindo a falha, registra `classificacao_recusada` e não grava nada.
+
+Decisões confirmadas nesta aprovação:
+
+1. Taxonomia fechada de 9 categorias aprovada como rascunho definitivo para esta fase.
+2. Modelo classe mini/flash via OpenRouter (`ModeloIA` configurável); chave somente em
+   variável de ambiente `OPENROUTER_API_KEY`, nunca em arquivo ou repositório.
+3. OCR fica FORA do escopo desta fase; scans sem texto recebem marcador
+   `sem_texto_para_classificar` e ficam para fase futura.
+4. Dependência autorizada: `pip install pypdf`.
+5. Modificações ADITIVAS autorizadas em `config.ps1` e `modulos/modulo_pdf.ps1`.
+6. Smoke test real (3 PDFs de G:\) autorizado APENAS após suíte automatizada 100% verde;
+   testes automatizados usam mock injetável (`-FuncaoChamada`) — zero rede.
+7. Status elegível para classificar: `inventariado` e `_REVISAR`; `_PROBLEMAS`,
+   `desaparecido` e substituídos jamais são processados; texto < mínimo configurável não
+   consome chamada de IA.
+8. A Fase C não move, não renomeia, não exclui e não preenche campos de execução
+   (`destino_proposto`, `aprovado`) — isso pertence à fase seguinte com aprovação humana.
+
+### Motivo
+
+Manter o catálogo como única verdade com zonas de escrita explícitas permite ganhar a
+inteligência da IA sem contaminar a base técnica auditável; o histórico append-only honra o
+princípio "nunca sobrescrever silenciosamente"; o contrato injetável de chamada torna todo o
+pipeline testável offline e prepara a troca plugável por modelos locais para coleções sensíveis.
+
+---
+
+## 2026-08-21 — Biblioteca Viva: promoção do OpenCode/9Router como provedor padrão da classificação
+
+### Decisão
+
+Após smoke test real bem-sucedido (2 chamadas, JSON válido na primeira tentativa, custo zero,
+repositório real intocado), o caminho de IA padrão da Fase C passa a ser o OpenCode autenticado
+pelo 9Router:
+
+1. `ProvedorIA = 'opencode'` (chave nova) e `ModeloIA = 'opencode/nemotron-3.5-lightning-free'`
+   (id real provedor/modelo);
+2. O modelo real passa a ser registrado no catálogo, nos detalhes e no histórico porque a
+   configuração agora carrega o id verdadeiro — elimina-se o placeholder
+   `google/gemini-2.0-flash-001` sem alterar nenhum dos quatro pontos de escrita;
+3. Nova função `Invoke-BvChamadaOpencode`: invoca `opencode run -m <ModeloIA> --format json`,
+   extrai o texto dos eventos NDJSON, timeout de 180 s por chamada; nenhuma chave é criada ou
+   armazenada (a credencial permanece interna ao OpenCode);
+4. Ordem de despacho preservada: `-FuncaoChamada` (testes, offline) → opencode (padrão) →
+   OpenRouter (alternativa mantida com `UrlOpenRouter` e `Invoke-BvChamadaIA`, exige chave própria);
+5. Regra de consumo confirmada: resposta válida = 1 chamada; inválida = no máximo 1 retry;
+   persistindo a falha = `classificacao_recusada`; baixa confiança não gera rechamada; texto
+   insuficiente e erro de extração = 0 chamadas; nenhum mecanismo de segunda opinião ou reanálise;
+6. Teste 15 adicionado à suíte da Fase C: roteamento para `Invoke-BvChamadaOpencode` validado
+   com mock em escopo de script, sem rede.
+
+Fora de escopo (permanece): OCR, visão, múltiplas análises, movimentação, renomeação e qualquer
+preparação de Fase D.
+
+### Motivo
+
+Usar o ambiente de IA que o laboratório já opera elimina gestão de chaves e custo marginal;
+manter o OpenRouter como alternativa preserva redundância; registrar o modelo real na fonte
+única (config) corrige os quatro pontos de escrita de uma vez, sem alterar o esquema v1 nem o
+contrato injetável que mantém toda a suíte testável offline.
+
+---
+
 *Registro permanente das decisões estruturais do Laboratório de IA.*
