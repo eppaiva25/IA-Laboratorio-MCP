@@ -1,6 +1,14 @@
 # Estado Atual — Laboratório de IA
 
-**Última atualização:** 20/08/2026 (nova chave OpenRouter + validação Claude Code)
+**Última atualização:** 21/08/2026 (primeiro protótipo da Biblioteca Viva funcionando de ponta a ponta)
+
+## Biblioteca Viva — primeiro protótipo FUNCIONANDO (21/08/2026)
+
+- Fluxo comprovado de ponta a ponta: **PDF → extração de texto → opencode → 9Router/OpenRouter → modelo → resposta**.
+- Caminho IA usado: `Invoke-BvChamadaOpencode` (nucleo/classificador.ps1) → `opencode run -m opencode/nemotron-3.5-lightning-free`, timeout 180 s.
+- Funções novas na CLI: `Get-BvCliTextoDocumento` (reaproveita cache `dados\extracoes\<id>.txt`; extrai só se faltar) e `Invoke-BvCliPergunta` (contexto + pergunta → modelo).
+- **Limitação conhecida (registrada, NÃO resolver agora):** apenas os **primeiros `LimiteCaracteresIA` = 6.000 caracteres** do texto são enviados ao modelo; a resposta considera só o início do documento. Sem chunking/RAG/embeddings/vetor por enquanto — decisão futura separada.
+- Menu interativo da CLI ainda não religado à opção de pergunta (função pronta, integração pendente); catálogo real recomposto com os 45 PDFs após o incidente (ver INCIDENTE-2026-08-21).
 
 ## Objetivo
 
@@ -169,6 +177,119 @@ Ao iniciar uma nova sessão, consultar primeiro:
 1. memoria/ESTADO-ATUAL.md
 2. memoria/DECISOES.md
 3. sessão mais recente em memoria/SESSOES/
+
+---
+
+## Biblioteca Viva — Estado consolidado em 2026-08-21
+
+### Objetivo
+
+Construir uma **biblioteca documental** que permita localizar documentos, ler seu conteúdo e fazer perguntas sobre eles usando uma camada de IA desacoplada. A Biblioteca Viva **não conhece nem precisa conhecer o modelo efetivo** — qualquer troca de provedor/modelo é responsabilidade do roteador, sem alteração da aplicação.
+
+### Estrutura atual
+
+- `biblioteca-viva/cli/cli.ps1` — CLI principal (4 opções). Único arquivo de código alterado nesta etapa.
+- `biblioteca-viva/nucleo/` — núcleo A/B/C (intocado nesta etapa).
+  - `Invoke-BvChamadaOpencode` é o **único adapter de IA**. A CLI o consome indiretamente via `Invoke-BvCliPergunta`.
+  - Modelo configurado em `nucleo/config.ps1` (`ModeloIA`); pode ser alternado sem alterar a aplicação.
+- `biblioteca-viva/prototipo/` — protótipo fechado (intocado).
+- `biblioteca-viva/dados/` — dados locais (intocados). `catalogo.csv` contém apenas o cabeçalho.
+- `biblioteca-viva/testes/teste-cli.ps1` — suíte de testes adaptada ao CLI real desta etapa.
+- `memoria/PENDENCIA-CATALOGO-VAZIO.md` — pendência do catálogo real (separada, não investigada).
+- `memoria/INCIDENTE-2026-08-21-DESTRUICAO-DADOS.md` — incidente (separado, não investigado).
+
+### CLI — menu real (4 opções)
+
+```
+BIBLIOTECA VIVA
+----------------
+Catálogo: N arquivos
+
+1. Listar documentos
+2. Pesquisar documento
+3. Perguntar à IA sobre um documento
+4. Sair
+```
+
+#### Opção 1 — Listar documentos
+Imprime a tabela do catálogo via `Get-BvCliTabelaCatalogo`. Não depende do provedor.
+
+#### Opção 2 — Pesquisar documento
+Recebe um termo e usa `Get-BvCliLinhasEncontradas` (case-insensitive, busca em `id`, `nome_original`, `caminho_atual`). Retorna a tabela com o número de ocorrências.
+
+#### Opção 3 — Perguntar à IA sobre um documento
+Fluxo de **sessão de leitura interativa**:
+
+1. **Seleção do documento** — `Resolve-BvCliDocumento` aceita:
+   - **número** (1..N) na listagem atual;
+   - **ID** exato;
+   - **termo** de busca (devolve candidato único ou múltiplos; em caso de múltiplos, pede o número).
+2. **Primeira pergunta** — pede texto e chama `Invoke-BvCliPergunta`, que monta contexto (texto extraído do `dados/extracoes/<id>.txt`, limitado a `LimiteCaracteresIA` do config) + pergunta e delega a `Invoke-BvChamadaOpencode`.
+3. **Submenu** após a resposta:
+   ```
+   ---
+   Documento: <nome> (<id>)
+   1. Nova pergunta sobre este documento
+   2. Escolher outro documento
+   3. Voltar ao menu
+   4. Sair
+   ```
+   - **1** — repete o ciclo de pergunta sobre o mesmo documento.
+   - **2** — volta à seleção de documento.
+   - **3** — encerra a sessão e volta ao menu principal.
+   - **4** — encerra a aplicação.
+
+#### Opção 4 — Sair
+Imprime `Encerrando.` e termina a CLI.
+
+### Fluxo testado nesta etapa
+
+Sequência validada:
+```
+3 → TesePolimeros → "Qual e o objetivo desta tese?" → 1 →
+"Quais tecnicas de caracterizacao foram utilizadas?" → 3 → 4
+```
+
+Resultado: 2 chamadas reais à IA, 2 respostas impressas, submenu apareceu duas vezes, retorno ao menu principal funcionou, encerramento pela opção 4 sem erros.
+
+### Independência da camada de IA
+
+- `Invoke-BvChamadaOpencode` é o **único ponto de contato** com o provedor.
+- A Biblioteca Viva não registra nem fixa o modelo.
+- Trocar `ModeloIA`/`ProvedorIA` em `nucleo/config.ps1` ou alternar o roteador não exige nenhuma mudança na CLI.
+- A resposta chega como string e a CLI apenas imprime. O tamanho da resposta é controlado pela camada de IA, não pela aplicação.
+
+### O que está intocado (preservado)
+
+- `biblioteca-viva/nucleo/` — intocado.
+- `biblioteca-viva/prototipo/` — intocado.
+- `biblioteca-viva/dados/` — intocado (incluindo `catalogo.csv`, `diario.jsonl`, `esquema.json`, `extracoes/`, `classificacoes/`).
+- 45 PDFs originais em `G:\Documentos_Todos\PDFs\Projeto PDFs` — intocados.
+- Nenhum `git reset`/`restore`/`checkout` foi feito.
+- Nenhuma operação destrutiva.
+
+### Pendências conhecidas
+
+- **Catálogo real vazio** — `catalogo.csv` tem só o cabeçalho (0 linhas). Ver `memoria/PENDENCIA-CATALOGO-VAZIO.md`. Não tratada nesta etapa.
+- **Incidente 2026-08-21** — ver `memoria/INCIDENTE-2026-08-21-DESTRUICAO-DADOS.md`. Não tratado nesta etapa.
+- **Modificações de sessões anteriores** — `biblioteca-viva/testes/teste-fase-b.ps1`, `teste-fase-c.ps1`, `teste-v01.ps1` e `biblioteca-viva/testes/sandbox.ps1` aparecem alterados/untracked. **Não foram tocados nesta etapa** e **não fazem parte do commit da Biblioteca Viva**.
+
+### Limitações atuais
+
+- A opção 3 envia ao modelo apenas os primeiros `LimiteCaracteresIA` (6000) caracteres do texto extraído. Sem chunking/RAG/embeddings.
+- Sem histórico persistente de sessão; cada pergunta é independente.
+- Sem filtros por categoria/status na opção 1 (depende de dados no catálogo real para ter utilidade).
+- A seleção de documento por termo exige que `Resolve-BvCliDocumento` resolva para um único candidato, ou que o usuário saiba escolher entre vários.
+
+### Próximo objetivo (não implementado agora)
+
+Resolver a pendência do catálogo real (decisão separada) e, em seguida, oferecer filtros por categoria/status na opção 1, listagem dos documentos classificados e visualização do histórico da sessão atual. A Biblioteca Viva continua sendo a única superfície de uso; nenhuma das evoluções acima altera a camada de IA.
+
+---
+
+### MARCO DE RECUPERAÇÃO — Biblioteca Viva MVP (a preencher com hash do commit)
+
+Este marco encerra o ciclo: o `cli.ps1` está em 4 opções, com sessão interativa de perguntas sobre o mesmo documento, camada de IA desacoplada, suíte adaptada ao CLI real, e documentação registrada. Uma nova sessão pode continuar o projeto a partir deste estado sem depender desta conversa.
 
 O objetivo é recuperar rapidamente o contexto sem depender da memória da sessão anterior da API.
 
