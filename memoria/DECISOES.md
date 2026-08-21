@@ -176,4 +176,50 @@ nenhuma ação jamais se baseia em metadados — apenas o pré-voo com hash auto
 
 ---
 
+## 2026-08-20 — Biblioteca Viva: arquitetura da Fase B (descoberta, reconciliação, roteamento e módulo PDF)
+
+### Decisão
+
+A Fase B acrescenta cinco componentes ao núcleo, aprovados antes da implementação:
+
+- **diario.ps1** — componente de primeira classe: diário JSONL append-only em `dados/`,
+  registrando cada transição (`arquivo_novo`, `movido_externamente`, `duplicata_detectada`,
+  `metadados_atualizados`, `conteudo_substituido`, `desaparecido`, `erro_identificacao`).
+- **descobridor.ps1** — camada barata: varredura por modo usando apenas
+  `caminho_atual + tamanho_bytes + modificado_em` contra índices em memória do catálogo;
+  produz `{NovosCandidatos, Suspeitos, Inalterados, AusentesDoDisco}`; nunca lê conteúdo,
+  nunca calcula hash, nunca grava.
+- **reconciliacao.ps1** — camada confiável: hash somente de novos e suspeitos; refinamento em
+  novo real / movimento externo / duplicata / só metadados / conteúdo alterado; aplica todas as
+  mudanças numa única gravação atômica (checkpoint opcional para lotes grandes); aciona
+  roteador+módulo para gerar a ficha técnica; registra cada evento no diário.
+- **roteador.ps1** — três estados (`ComModulo` / `ConhecidoSemModulo` / `Desconhecido`);
+  registro único extensão→script; carregamento do módulo sob demanda.
+- **modulos/modulo_pdf.ps1** — primeiro especialista, somente leitura: valida `%PDF-`/`%%EOF`,
+  extrai versão/páginas/fonte/produtor/criptografia por janelas de bytes (leitura integral só
+  abaixo do limite de análise leve), devolve a ficha padrão com `Alertas`;
+  `AmostraConteudo` permanece vazio na V0.1.
+
+Decisões confirmadas nesta aprovação:
+
+1. `AusentesDoDisco` considera somente linhas dentro do escopo efetivamente varrido
+   ("não visto ≠ sumiu").
+2. Índices em memória (caminho→linha, hash→linhas) evitam consultas O(n²).
+3. Movimentos externos são resolvidos ANTES de marcar desaparecidos.
+4. Checkpoint opcional (`-CheckpointACada N`) não altera a semântica do catálogo.
+5. Extensões sem módulo ou desconhecidas seguem para `_REVISAR`; nunca geram ação automática.
+6. O módulo PDF não executa movimentação, renomeação ou exclusão de arquivos.
+7. Status derivado da análise: ilegível → `_PROBLEMAS`; com alertas → `_REVISAR`;
+   análise limpa → `inventariado`.
+8. Testes da Fase B usam sandbox em `%TEMP%`; nenhuma varredura real em G:\ nesta fase.
+
+### Motivo
+
+Separar detecção barata de identificação confiável mantém a varredura incremental viável para
+milhares de arquivos sem enfraquecer o pré-voo; o diário append-only fornece auditoria e base
+para rollback futuro; o módulo PDF estabelece na prática o contrato das 5 perguntas que os
+próximos módulos replicarão.
+
+---
+
 *Registro permanente das decisões estruturais do Laboratório de IA.*
