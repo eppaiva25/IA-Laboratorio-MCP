@@ -138,4 +138,42 @@ antes de estudar alternância unificada entre backends.
 
 ---
 
+## 2026-08-20 — Biblioteca Viva: dois modos de operação (MIGRAÇÃO/LOTE e MANUTENÇÃO/INCREMENTAL)
+
+### Decisão
+
+A Biblioteca Viva terá um único núcleo compartilhado com dois modos de operação,
+selecionados por parâmetro de estratégia de varredura, sem duplicar lógica:
+
+- **MIGRAÇÃO/LOTE** — varredura ampla do acervo completo (migração inicial e grandes lotes).
+- **MANUTENÇÃO/INCREMENTAL** — pequenos lotes de arquivos novos ou alterados (ex.: Downloads),
+  com detecção de delta e nenhum reprocessamento de arquivos já conhecidos e inalterados.
+
+Regras que sustentam os dois modos:
+
+1. **Detecção barata** por `caminho_atual + tamanho_bytes + modificado_em`: decide apenas quem é
+   IGNORADO na varredura (conhecido e inalterado); nunca autoriza ação.
+2. **Hash SHA-256 somente para arquivos novos ou suspeitos** (metadados divergentes),
+   calculado em fluxo.
+3. **Identidade do conteúdo = SHA-256**; **identidade da ocorrência catalogada =
+   (sha256 + caminho_atual)**, com unicidade validada pela porta única do catálogo.
+4. **Pipeline compartilhado**: descobridor → reconciliação → catálogo → módulos → classificação →
+   proposta → aprovação humana → execução → pré-voo. O modo altera somente a descoberta.
+5. **Pré-voo obrigatório** antes de qualquer execução: re-stat + re-hash + existência,
+   independente do que a detecção barata concluiu.
+6. Conteúdo alterado gera linha nova com `substituido_por` ligando à antiga (histórico preservado);
+   arquivo não localizado recebe status `desaparecido`, nunca é apagado do catálogo.
+
+O catálogo nasce com esquema versão 1, 26 colunas universais + gaveta `detalhes`,
+em `biblioteca-viva/dados/` (fora do Git).
+
+### Motivo
+
+O uso normal da aplicação após a migração inicial será incremental (pequenos lotes acumulados).
+Tratar o modo incremental como requisito da V0.1 evita retrabalho futuro; a detecção barata por
+metadados torna a varredura viável para milhares de arquivos sem enfraquecer a segurança, pois
+nenhuma ação jamais se baseia em metadados — apenas o pré-voo com hash autoriza execução.
+
+---
+
 *Registro permanente das decisões estruturais do Laboratório de IA.*
