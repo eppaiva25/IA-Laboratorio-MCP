@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "nome": "biblioteca-exemplo",
+    "versao": 1,
+    "status": "aprovada",
+    "base_versao": null,
+    "criada_em": "2026-08-21 10:00:00",
+    "aprovada_em": "2026-08-21 10:30:00",
+    "descricao": "Biblioteca FICTICIA do prototipo. Nenhum dado real do acervo."
+  },
+  "taxonomia": { "origem": "config", "versao_esquema": 1 },
+  "nos": [
+    { "id": "n_doc_pessoais", "caminho": "Documentos Pessoais", "descricao": "Certidoes e documentos civis ficticios." },
+    { "id": "n_fin_extratos", "caminho": "Financeiro/Extratos", "descricao": "Extratos bancarios." },
+    { "id": "n_fin_geral",    "caminho": "Financeiro/Geral",    "descricao": "Demais documentos financeiros." },
+    { "id": "n_academico",    "caminho": "Academico",           "descricao": "Teses, artigos e material tecnico." }
+  ],
+  "regras": [
+    {
+      "id": "r_001",
+      "descricao": "Extratos bancarios identificados pelo nome",
+      "quando": { "todos": [
+        { "campo": "categoria", "operador": "igual", "valor": "financeiro" },
+        { "campo": "nome_original", "operador": "contem", "valor": "extrato" }
+      ]},
+      "entao": { "destino": "n_fin_extratos" }
+    },
+    {
+      "id": "r_002",
+      "descricao": "Demais documentos financeiros",
+      "quando": { "todos": [
+        { "campo": "categoria", "operador": "igual", "valor": "financeiro" }
+      ]},
+      "entao": { "destino": "n_fin_geral" }
+    },
+    {
+      "id": "r_003",
+      "descricao": "Documentos pessoais com alta confianca",
+      "quando": { "todos": [
+        { "campo": "categoria", "operador": "igual", "valor": "documento_pessoal" },
+        { "campo": "confianca", "operador": "maior_igual", "valor": 0.8 }
+      ]},
+      "entao": { "destino": "n_doc_pessoais" }
+    },
+    {
+      "id": "r_004",
+      "descricao": "Material academico e tecnico",
+      "quando": { "todos": [
+        { "campo": "categoria", "operador": "igual", "valor": "academico_tecnico" }
+      ]},
+      "entao": { "destino": "n_academico" }
+    }
+  ],
+  "fallback": {
+    "sem_regra": { "acao": "nenhuma", "registrar_como": "pendente_de_regra" }
+  }
+}

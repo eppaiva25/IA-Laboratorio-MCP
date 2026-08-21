@@ -1,0 +1,6 @@
+{"id":"f001","nome_original":"extrato-banco-exemplo-2026.pdf","tipo":".pdf","categoria":"financeiro","confianca":0.92,"lote":"20260821-093000"}
+{"id":"f002","nome_original":"fatura-cartao-exemplo.pdf","tipo":".pdf","categoria":"financeiro","confianca":0.85,"lote":"20260821-093000"}
+{"id":"f003","nome_original":"certidao-exemplo.pdf","tipo":".pdf","categoria":"documento_pessoal","confianca":0.90,"lote":"20260821-093000"}
+{"id":"f004","nome_original":"documento-pessoal-generico.pdf","tipo":".pdf","categoria":"documento_pessoal","confianca":0.50,"lote":"20260821-093000"}
+{"id":"f005","nome_original":"tese-polimeros-exemplo.pdf","tipo":".pdf","categoria":"academico_tecnico","confianca":0.88,"lote":"20260821-093000"}
+{"id":"f006","nome_original":"receita-de-bolo-exemplo.txt","tipo":".txt","categoria":"religioso","confianca":0.70,"lote":"20260821-093000"}
