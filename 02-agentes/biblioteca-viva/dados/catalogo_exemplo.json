@@ -1,0 +1,24 @@
+{
+  "versao_esquema": 1,
+  "nome": "Biblioteca",
+  "descricao": "Catalogo oficial de categorias da Biblioteca Viva. Fonte de verdade: o agente nunca move um arquivo para fora destas categorias.",
+  "categorias": {
+    "Documentos": {
+      "Pessoal": {},
+      "Financeiro": {}
+    },
+    "Fotos": {
+      "Família": {},
+      "Viagens": {}
+    },
+    "Vídeos": {
+      "Família": {},
+      "Cursos": {}
+    },
+    "Tecnologia": {
+      "Linux": {},
+      "Programação": {}
+    },
+    "Outros": {}
+  }
+}
