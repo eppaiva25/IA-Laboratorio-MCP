@@ -473,6 +473,87 @@ resto são arquivos novos (docs, dados, testes, logs).
 - O2: não iniciada.
 - Nenhum outro documento foi criado nesta fase além deste.
 
+## 19. TESTE FÍSICO REAL DO EXECUTOR — APROVADO (2026-08-23)
+
+Status: **TESTE FÍSICO REAL APROVADO / etapa concluída.**
+
+Contexto: após a implementação do `executar.py` (executor de decisões
+simuladas com revisão humana; commits `7126fba` e `d811927`) e da suíte
+offline `testes/teste_executor.py` (47/47 verificações, rc=0), o usuário
+executou manualmente o primeiro movimento físico real sobre arquivos
+pessoais, aprovando item a item pela interface interativa do executor.
+
+### Parâmetros da corrida
+
+- Origem: `G:\Documentos_Todos\ProjetoArgMistos`
+- Destino (biblioteca): `G:\Documentos_Todos\Biblioteca-Teste-V2`
+- Log de simulação (fonte das decisões): `eventos/eventos_20260822_223745.jsonl`
+- Log de execução (produzido nesta etapa):
+  `eventos/eventos_20260823_012441_decisoes.jsonl`
+- Tentativa anterior da mesma etapa
+  (`eventos/eventos_20260823_011821_decisoes.jsonl`): os 44 itens foram
+  recusados pelo usuário já na revisão (`quantidade_aprovada=0`,
+  `confirmacao=false`) e a execução encerrou sem nenhum movimento físico;
+  mantida como histórico descartado — mesmo critério do log `191511`
+  (seção 15).
+
+### Fluxo validado ponta a ponta
+
+SIMULAR → REVISAR → APROVAR/RECUSAR → CONFIRMAR → EXECUTAR → VERIFICAR →
+REGISTRAR. Pela primeira vez no projeto, o ciclo completo incluiu movimento
+físico real precedido de revisão humana por item e confirmação explícita
+(default NÃO) registrada em evento antes do primeiro `shutil.move`.
+
+### Resultado
+
+- 44 decisões lidas do log de simulação;
+- 42 aprovadas pelo usuário;
+- 2 recusadas pelo usuário;
+- 0 bloqueios técnicos (`origem_ausente`, `hash_divergente`,
+  `fora_da_biblioteca`, `categoria_invalida`, `estrutura_invalida`);
+- 42 movimentos físicos realizados.
+
+### Verificação (verificar_resultado.py)
+
+- 42/42 arquivos processados = OK;
+- `falhas_auditoria=0`.
+
+### Consolidação (consolidar_corrida.py)
+
+- `movido_confirmado` = 41;
+- `sem_evento` = 2;
+- `ainda_na_origem` = 0; `inconsistente` = 0; `informacao_insuficiente` = 0;
+- 1 hash SHA-256 repetido colapsado na consolidação.
+
+Interpretação objetiva dos dois números não-triviais:
+
+1. Os 2 `sem_evento` são exatamente os 2 arquivos RECUSADOS pelo usuário na
+   revisão: nunca receberam evento físico porque nada foi feito com eles.
+   Não representam falha — representam a recusa humana funcionando.
+2. A diferença entre 42 movimentos físicos e 41 `movido_confirmado` decorre
+   do colapso do par de arquivos byte-idênticos (mesmo SHA-256
+   `d09b428955…f155226`) na consolidação: 43 hashes únicos no log, dos quais
+   42 têm evento físico e um deles cobre os dois caminhos movidos.
+
+### Garantias observadas durante a execução física
+
+- Cada movimento foi verificado fisicamente pela tríade: **destino existe +
+  origem vazia + hash idêntico** (mesmo critério do modo ORGANIZAR).
+- Nenhuma nova análise da IA ocorreu: todas as decisões vieram
+  exclusivamente do log de simulação, reaproveitadas por `hash_sha256`;
+  o campo `modelo` dos eventos físicos registra
+  `(nao consultada - decisao reaproveitada)`.
+- O log da simulação permaneceu separado e somente leitura (append-only,
+  intocado); a execução produziu log de auditoria próprio
+  (`eventos_20260823_012441_decisoes.jsonl`), mantendo os dois registros
+  auditáveis de forma independente.
+
+### Conformidade desta etapa
+
+- Documentação adicionada sem alterar nenhum código funcional.
+- O2/O4: não iniciados.
+
+
 
 
 
