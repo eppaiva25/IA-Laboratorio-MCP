@@ -28,7 +28,14 @@ for evento in processados:
         elif "hash_sha256" in evento and calcular_hash(alvo) != evento["hash_sha256"]:
             problemas.append("HASH DIFERENTE no destino!")
     else:
-        if evento["status"] == "nao_decidido_erro_ia" and Path(evento["origem"]).exists():
+        if evento.get("modo") == "simular":
+            if evento["status"] != "simulado":
+                problemas.append(f"status inesperado em simulacao: {evento['status']}")
+            if ciclo["verificar"].get("resultado") != "nao_aplicavel":
+                problemas.append(f"verificar.resultado inesperado em simulacao: {ciclo['verificar'].get('resultado')}")
+            if not Path(evento["origem"]).exists():
+                problemas.append("origem deveria existir na simulacao!")
+        elif evento["status"] == "nao_decidido_erro_ia" and Path(evento["origem"]).exists():
             pass
         else:
             problemas.append("sem destino mas status inesperado")
