@@ -14,8 +14,8 @@ for evento in processados:
     nome = Path(evento["origem"]).name
     ciclo = evento["ciclo"]
     problemas = []
-    if evento.get("versao_esquema") != 1:
-        problemas.append("versao_esquema != 1")
+    if evento.get("versao_esquema") not in (1, 2):
+        problemas.append(f"versao_esquema invalida: {evento.get('versao_esquema')}")
     if set(ciclo.keys()) != {"perceber", "decidir", "agir", "verificar"}:
         problemas.append(f"ciclo incompleto: {sorted(ciclo.keys())}")
     destino = ciclo["agir"].get("destino_real")

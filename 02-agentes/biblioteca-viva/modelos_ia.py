@@ -4,6 +4,8 @@ import re
 import urllib.error
 import urllib.request
 
+from modulos import percepcao_para_pedido
+
 URL_OLLAMA = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
 MODELO_ENV = os.getenv("BIBLIOTECA_MODELO") or os.getenv("OLLAMA_MODEL")
 LIMITE_TOKENS_RESPOSTA = 400
@@ -49,7 +51,7 @@ def modelos_disponiveis():
 
 def propor(modelo, percepcao, categorias_validas):
     pedido = json.dumps(
-        {"percepcao": percepcao, "categorias_validas": categorias_validas},
+        {"percepcao": percepcao_para_pedido(percepcao), "categorias_validas": categorias_validas},
         ensure_ascii=False,
     )
     mensagens = [

@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 import catalogo
@@ -36,6 +37,7 @@ def executar(entrada, biblioteca, caminho_catalogo, modo):
 
     return {
         "catalogo_dados": dados_catalogo,
+        "catalogo_sha256": _hash_arquivo(caminho_catalogo),
         "categorias": caminhos_categorias,
         "arquivos": arquivos,
         "avisos": avisos,
@@ -76,3 +78,9 @@ def _provar_escrita(biblioteca, arvore_categorias):
         prova.unlink()
     except OSError as erro:
         raise ErroPreVoo(f"biblioteca nao gravavel em {biblioteca}: {erro}")
+
+
+def _hash_arquivo(caminho):
+    digestor = hashlib.sha256()
+    digestor.update(Path(caminho).read_bytes())
+    return digestor.hexdigest()

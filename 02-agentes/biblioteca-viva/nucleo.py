@@ -17,6 +17,7 @@ class Agente:
         self.entrada = Path(entrada).resolve()
         self.biblioteca = Path(biblioteca).resolve()
         self.categorias = resultado_pre_voo["categorias"]
+        self.catalogo_sha256 = resultado_pre_voo.get("catalogo_sha256")
         self.modelo = modelo
         self.modo = modo
         self.limiar = limiar
@@ -25,7 +26,7 @@ class Agente:
 
     def rodar(self, arquivos):
         total = len(arquivos)
-        self._evento({"evento": "execucao_iniciada", "total_arquivos": total})
+        self._evento({"versao_esquema": 2, "evento": "execucao_iniciada", "total_arquivos": total})
         self.mostrar(f"\nAnalisando {total} arquivo(s) | modo={self.modo} | modelo(IA)={self.modelo} | limiar={self.limiar}%")
         resultados = []
         for indice, caminho in enumerate(arquivos, 1):
@@ -105,7 +106,7 @@ class Agente:
         self.mostrar(f"  REGISTRAR  {self.arquivo_eventos.name}  [status: {status}]")
 
         evento = {
-            "versao_esquema": 1,
+            "versao_esquema": 2,
             "evento": "arquivo_processado",
             "tentativa": tentativa,
             "quando": _agora(),
@@ -146,7 +147,7 @@ class Agente:
         self.mostrar(f"  VERIFICAR  nao aplicavel")
         self.mostrar(f"  REGISTRAR  {self.arquivo_eventos.name}  [status: nao_decidido_erro_ia]")
         evento = {
-            "versao_esquema": 1,
+            "versao_esquema": 2,
             "evento": "arquivo_processado",
             "tentativa": tentativa,
             "quando": _agora(),
@@ -171,7 +172,7 @@ class Agente:
         self.mostrar(f"  ERRO INESPERADO: {erro.__class__.__name__}: {erro}")
         self.mostrar("  arquivo NAO movido")
         evento = {
-            "versao_esquema": 1,
+            "versao_esquema": 2,
             "evento": "arquivo_processado",
             "tentativa": tentativa,
             "quando": _agora(),
@@ -208,11 +209,14 @@ class Agente:
             self.mostrar("\nEstado final da biblioteca:")
             _imprimir_arvore(self.biblioteca, prefixo="  ")
         self._evento({
+            "versao_esquema": 2,
             "evento": "execucao_concluida",
             "contagens_por_status": dict(contagens),
         })
 
     def _evento(self, dados):
+        if self.catalogo_sha256 is not None and "catalogo_sha256" not in dados:
+            dados["catalogo_sha256"] = self.catalogo_sha256
         self.arquivo_eventos.parent.mkdir(parents=True, exist_ok=True)
         linha = json.dumps(dados, ensure_ascii=False) + "\n"
         with open(self.arquivo_eventos, "a", encoding="utf-8") as arquivo:
