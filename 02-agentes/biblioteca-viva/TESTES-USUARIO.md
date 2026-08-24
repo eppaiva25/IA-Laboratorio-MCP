@@ -553,8 +553,33 @@ Interpretação objetiva dos dois números não-triviais:
 - Documentação adicionada sem alterar nenhum código funcional.
 - O2/O4: não iniciados.
 
+## 20. DA4 + TESTE REAL CONTROLADO EM MODO SIMULAR — CONCLUÍDO (2026-08-23)
 
+Status: **CONCLUÍDA — modo SIMULAR validado.** Registro integral em
+`VALIDACAO-REAL-CONTROLADA.md`; resumo objetivo:
 
+- **DA4 (leitura multiformato mínima)**: criados `modulos/modulo_xlsx.py` e
+  `modulos/modulo_pptx.py` (100% stdlib, somente leitura, `None` em falha);
+  registrados em `modulos/__init__.py`; fixtures e verificações 14–19 no
+  `teste_qualidade_leitura.py`. Suíte: 19/19 OK + bateria determinística
+  completa com sucesso (`teste_executor` 47/47; demais rc=0). XLSX/PPTX não
+  apareceram na pasta do teste real.
+- **Teste real controlado**: origem `G:\Documentos_Todos\Proj_Pasta_Downloads`
+  (28 arquivos, 3,59 GB), modo `simular`, modelo `gemma4:12b`, catálogo V1
+  (SHA `5c69f540…`). Evidência: `eventos/eventos_20260823_214011.jsonl`.
+  Resultados: 28/28 processados; 28/28 `proposta_da_ia` (=28 chamadas reais ao
+  modelo); 0 `erro_da_ia`; duração 844 s (14,1 min); latência média 31,3 s
+  (mediana 27 s); 7/28 com conteúdo confiável (4 TXT + 2 MD + 1 PDF);
+  propostas = executadas (Programação 14, Outros 13, Linux 1);
+  `ajuste_do_sistema` 0.
+- **Lacunas registradas para revisão ANTES do modo real** (sem correção
+  automática): instaladores (.msi/.exe/.apk) classificados como Programação;
+  áudio/vídeo genérico sem categoria adequada; fotos/vídeos sem evidência para
+  distinguir Família/Viagens. Detalhe na seção 5 do documento da etapa.
+- **Integridade**: nenhum arquivo movido/alterado/excluído; origem intacta
+  28/28; `Biblioteca_DryRun` com 0 arquivos; catálogo inalterado.
+- **Movimentação física sobre esta pasta: NÃO autorizada.** Correções de
+  catálogo/regra dependem de nova autorização explícita.
 
 
 

@@ -3,6 +3,7 @@ import json
 import shutil
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -134,6 +135,74 @@ try:
            and "shutil.move" in fonte_mover
            and movido.exists() and not origem_teste.exists()
            and modulos.calcular_hash(movido) == hash_antes)
+
+    from modulos import modulo_pptx, modulo_xlsx
+    checar("14 mapa DA4: xlsx/pptx registrados; exe continua em metadados",
+           modulos.modulo_para(".xlsx") is modulo_xlsx
+           and modulos.modulo_para(".pptx") is modulo_pptx
+           and modulos.modulo_para(".exe") is modulos.modulo_metadados
+           and modulos.modulo_para(".doc") is modulos.modulo_metadados)
+
+    arquivo_xlsx = temporario / "orcamento.xlsx"
+    with zipfile.ZipFile(arquivo_xlsx, "w") as pacote:
+        pacote.writestr(
+            "xl/sharedStrings.xml",
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="2" uniqueCount="2">'
+            "<si><t>Planilha de orcamento mensal da casa</t></si>"
+            "<si><t>Itens previstos: mercado, transporte e lazer.</t></si></sst>",
+        )
+    percepcao_xlsx = modulos.perceber(arquivo_xlsx)
+    checar("15 XLSX com texto recuperavel e lido como conteudo confiavel",
+           percepcao_xlsx["leitura_por"] == modulo_xlsx.DESCRICAO
+           and "orcamento mensal" in percepcao_xlsx["conteudo"]
+           and percepcao_xlsx["conteudo_confivel"] is True
+           and percepcao_xlsx["conteudo_sinalizacao"] is None)
+
+    arquivo_pptx = temporario / "apresentacao.pptx"
+    with zipfile.ZipFile(arquivo_pptx, "w") as pacote:
+        for numero, linhas in enumerate(
+            [["Apresentacao do projeto", "Introducao e objetivos principais"],
+             ["Resultados parciais", "Proximos passos e cronograma"]], 1):
+            paragrafos = "".join(
+                f"<a:p><a:r><a:t>{linha}</a:t></a:r></a:p>" for linha in linhas)
+            pacote.writestr(
+                f"ppt/slides/slide{numero}.xml",
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                '<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"'
+                ' xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">'
+                f"<p:cSld><p:spTree>{paragrafos}</p:spTree></p:cSld></p:sld>")
+    percepcao_pptx = modulos.perceber(arquivo_pptx)
+    checar("16 PPTX le slides na ordem e extrai texto",
+           percepcao_pptx["leitura_por"] == modulo_pptx.DESCRICAO
+           and percepcao_pptx["conteudo_confivel"] is True
+           and percepcao_pptx["conteudo"].index("Apresentacao do projeto")
+           < percepcao_pptx["conteudo"].index("Resultados parciais"))
+
+    xlsx_vazio = temporario / "vazio.xlsx"
+    xlsx_vazio.write_bytes(b"isto nao e um zip valido")
+    pptx_vazio = temporario / "vazio.pptx"
+    with zipfile.ZipFile(pptx_vazio, "w") as pacote:
+        pacote.writestr("[Content_Types].xml", "<Types/>")
+    percepcao_xlsx_vazio = modulos.perceber(xlsx_vazio)
+    percepcao_pptx_vazio = modulos.perceber(pptx_vazio)
+    checar("17 XLSX/PPTX sem texto recuperavel -> sem_texto sinalizado",
+           percepcao_xlsx_vazio["conteudo"] is None
+           and percepcao_xlsx_vazio["conteudo_sinalizacao"] == "sem_texto"
+           and percepcao_pptx_vazio["conteudo"] is None
+           and percepcao_pptx_vazio["conteudo_sinalizacao"] == "sem_texto")
+
+    executavel = temporario / "instalador.exe"
+    executavel.write_bytes(b"MZ" + b"\x00" * 256)
+    percepcao_exe = modulos.perceber(executavel)
+    checar("18 formato nao suportado (.exe) segue somente metadados",
+           percepcao_exe["conteudo"] is None
+           and percepcao_exe["conteudo_sinalizacao"] == "sem_texto"
+           and "metadados" in percepcao_exe["leitura_por"])
+
+    checar("19 contrato de percepcao intacto nos novos formatos",
+           set(percepcao_txt.keys()) == set(percepcao_xlsx.keys())
+           and set(percepcao_txt.keys()) == set(percepcao_pptx.keys()))
 finally:
     shutil.rmtree(temporario, ignore_errors=True)
 
@@ -144,4 +213,4 @@ print()
 if falhas:
     print(f"RESULTADO: FALHA - {len(falhas)} verificacao(oes) reprovaram")
     sys.exit(1)
-print("RESULTADO: OK - qualidade de leitura validada (O3)")
+print("RESULTADO: OK - qualidade de leitura validada (O3) + leitura multiformato minima (DA4)")

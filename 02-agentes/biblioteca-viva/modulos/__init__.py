@@ -3,11 +3,13 @@ import unicodedata
 from datetime import datetime
 from pathlib import Path
 
-from . import modulo_docx, modulo_metadados, modulo_pdf, modulo_texto
+from . import modulo_docx, modulo_metadados, modulo_pdf, modulo_pptx, modulo_texto, modulo_xlsx
 
 MODULOS_LEITURA = {
     ".pdf": modulo_pdf,
     ".docx": modulo_docx,
+    ".xlsx": modulo_xlsx,
+    ".pptx": modulo_pptx,
     ".txt": modulo_texto,
     ".md": modulo_texto,
     ".csv": modulo_texto,
