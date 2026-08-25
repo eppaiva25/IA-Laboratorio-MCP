@@ -17,7 +17,7 @@ IA (Ollama)  --propõe JSON-->  núcleo determinístico  --valida e executa-->  
 | Etapa | Onde no código | O que faz |
 |---|---|---|
 | PERCEBER | `modulos/__init__.py` (`perceber`) | hash SHA-256, nome, extensão, tamanho e conteúdo (quando houver módulo de leitura) |
-| DECIDIR | `modelos_ia.py` + `nucleo._validar_proposta` | IA propõe `{categoria, confianca, motivo}`; sistema valida contra o catálogo e aplica limiar de confiança |
+| DECIDIR | `modelos_ia.py` + `nucleo._validar_proposta` | IA propõe `{categoria, confianca, motivo}`; código determina tipo-base pela extensão e valida contra o catálogo; limiar de confiança aplicado |
 | AGIR | `nucleo._mover_sem_sobrescrever` | move sem nunca sobrescrever (sufixo `-1`, `-2`, …) ou apenas simula |
 | VERIFICAR | `nucleo.Agente.processar` | destino existe + origem vazia + hash idêntico ao da percepção |
 | REGISTRAR | `nucleo.Agente._evento` | linha JSONL append-only com todo o ciclo (`versao_esquema: 1`) |
@@ -54,6 +54,8 @@ Seleção de modelo (desacoplada de marca específica):
   produz status `nao_decidido_erro_ia`; o arquivo permanece na origem para revisão.
 - **Confiança abaixo do limiar** (`--limiar`, padrão 60): proposta válida da IA é ajustada
   deterministicamente para `Outros`.
+- **Tipo-base por extensão**: extensões conhecidas (.jpg → Fotos, .mp4 → Vídeos, .mp3 → Áudio,
+  .pdf/.docx → Documentos etc.) são mapeadas deterministicamente; a IA não decide o tipo-base.
 - **Identidade por hash**: SHA-256 recalculado após o movimento deve bater com o da percepção.
 - **Nada é apagado jamais.**
 
@@ -91,6 +93,8 @@ python -u testes/sonda_ollama.py             # latência dos modelos disponívei
 6. Eventos append-only em `eventos/eventos_*.jsonl`, `versao_esquema: 1`.
 7. Arquivos dentro de pastas ocultas (ex.: `.git`) são ignorados na varredura.
 8. Movimento com falha transitoria é tentado uma segunda vez antes de ser reportado.
+9. Tipo-base determinístico por extensão: mapeamento extensão→tipo→categoria-base
+   em `nucleo.py`; a IA só participa de subcategorias semânticas.
 
 ## Limitações conhecidas (próximas versões)
 

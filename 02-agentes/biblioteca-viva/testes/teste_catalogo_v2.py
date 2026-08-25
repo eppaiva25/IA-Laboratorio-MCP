@@ -17,7 +17,7 @@ folhas_v1 = catalogo.validar(dados_v1)
 folhas_v2 = catalogo.validar(dados_v2)
 
 verificacoes.append(("1 catalogo v2 valido para o leitor V1 (versao_esquema 1)", True))
-verificacoes.append(("2 folhas: v2 expande de 9 para 13", len(folhas_v1) == 9 and len(folhas_v2) == 13))
+verificacoes.append(("2 folhas: v2 expande de 9 para 14", len(folhas_v1) == 9 and len(folhas_v2) == 14))
 verificacoes.append(("3 v2 mantem todas as 9 folhas originais", set(folhas_v1).issubset(set(folhas_v2))))
 verificacoes.append(("4 v2 mantem Outros obrigatoria", "Outros" in folhas_v2))
 novas = {"Documentos/Viagens", "Documentos/Acadêmico", "Documentos/Digitalizados", "Tecnologia/Manuais"}

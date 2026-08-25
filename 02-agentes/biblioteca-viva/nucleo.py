@@ -12,6 +12,50 @@ class DecisaoInvalida(Exception):
     pass
 
 
+EXTENSAO_PARA_TIPO = {
+    ".jpg": "imagem", ".jpeg": "imagem", ".png": "imagem", ".gif": "imagem",
+    ".webp": "imagem", ".heic": "imagem", ".bmp": "imagem", ".tiff": "imagem",
+    ".mp4": "video", ".mkv": "video", ".avi": "video", ".mov": "video",
+    ".wmv": "video", ".webm": "video", ".flv": "video", ".m4v": "video",
+    ".mp3": "audio", ".wav": "audio", ".m4a": "audio", ".flac": "audio",
+    ".aac": "audio", ".ogg": "audio", ".wma": "audio", ".opus": "audio",
+    ".pdf": "documento", ".doc": "documento", ".docx": "documento",
+    ".txt": "documento", ".md": "documento", ".rtf": "documento",
+    ".odt": "documento", ".epub": "documento",
+    ".xls": "planilha", ".xlsx": "planilha", ".csv": "planilha",
+    ".ods": "planilha",
+    ".ppt": "apresentacao", ".pptx": "apresentacao", ".odp": "apresentacao",
+}
+
+TIPO_PARA_CATEGORIA_BASE = {
+    "imagem": "Fotos",
+    "video": "Vídeos",
+    "audio": "Áudio",
+    "documento": "Documentos",
+    "planilha": "Documentos",
+    "apresentacao": "Documentos",
+}
+
+
+def _tipo_por_extensao(extensao):
+    return EXTENSAO_PARA_TIPO.get(extensao.lower())
+
+
+def _categoria_base_compativel(extensao, categoria_proposta, categorias_validas):
+    tipo = _tipo_por_extensao(extensao)
+    if tipo is None:
+        return categoria_proposta
+    base = TIPO_PARA_CATEGORIA_BASE.get(tipo)
+    if base is None:
+        return categoria_proposta
+    if categoria_proposta.lower().startswith(base.lower()):
+        return categoria_proposta
+    for cat in categorias_validas:
+        if cat.lower().startswith(base.lower()):
+            return cat
+    return "Outros"
+
+
 class Agente:
     def __init__(self, entrada, biblioteca, resultado_pre_voo, modelo, modo, limiar, arquivo_eventos, mostrar=print):
         self.entrada = Path(entrada).resolve()
@@ -65,7 +109,7 @@ class Agente:
 
         try:
             proposta_da_ia = modelos_ia.propor(self.modelo, percepcao, self.categorias)
-            categoria_executada, confianca, motivo, ajuste = _validar_proposta(proposta_da_ia, self.categorias, self.limiar)
+            categoria_executada, confianca, motivo, ajuste = _validar_proposta(proposta_da_ia, self.categorias, self.limiar, percepcao["extensao"])
         except (modelos_ia.ErroIA, DecisaoInvalida) as erro:
             return self._registrar_nao_decidido_por_erro_da_ia(indice, total, caminho, tentativa, erro, percepcao)
         self.mostrar(
@@ -223,7 +267,7 @@ class Agente:
             arquivo.write(linha)
 
 
-def _validar_proposta(proposta, categorias_validas, limiar):
+def _validar_proposta(proposta, categorias_validas, limiar, extensao=""):
     categoria_bruta = str(proposta.get("categoria", "")).strip().strip("/\\").replace("\\", "/").strip("/")
     try:
         confianca = int(float(proposta.get("confianca", 0)))
@@ -239,6 +283,11 @@ def _validar_proposta(proposta, categorias_validas, limiar):
             f"Categorias validas: {categorias_validas}"
         )
     ajuste = ""
+    categoria_corrigida = _categoria_base_compativel(extensao, categoria, categorias_validas)
+    if categoria_corrigida != categoria:
+        motivo = f"[tipo_incompativel] proposta '{categoria}' viola regra de tipo para '{extensao}'. {motivo}"
+        ajuste = f"'{categoria}' -> {categoria_corrigida} (extensao {extensao} exige categoria base)"
+        categoria = categoria_corrigida
     if confianca < limiar and categoria != "Outros":
         motivo = f"[baixa confianca] proposta original era '{categoria}' ({confianca}%). {motivo}"
         categoria = "Outros"
