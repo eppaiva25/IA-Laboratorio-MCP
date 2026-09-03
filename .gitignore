@@ -1,0 +1,44 @@
+# Segredos e credenciais
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.bak
+
+# Biblioteca Viva - dados locais
+02-agentes/biblioteca-viva/dados/
+
+# Biblioteca Viva - mídia do teste físico
+02-agentes/biblioteca-viva/exemplos/Teste_Fisico_20260823_Biblioteca/
+
+# Biblioteca Viva - dados do teste de usuário
+02-agentes/biblioteca-viva/exemplos/Teste_Usuario_20260823_Biblioteca/
+02-agentes/biblioteca-viva/exemplos/Teste_Usuario_20260823_fotografia.csv
+
+# Arquivos de eventos gerados localmente
+02-agentes/biblioteca-viva/eventos/*.jsonl
+
+# Sistema operacional / IDE
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# CSVs gerados pelos testes físicos
+02-agentes/biblioteca-viva/exemplos/Teste_Fisico_20260823_fotografia_origem.csv
+02-agentes/biblioteca-viva/exemplos/Teste_Fisico_20260823_tabela_integridade.csv
