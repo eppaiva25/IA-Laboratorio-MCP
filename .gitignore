@@ -9,6 +9,12 @@
 secrets/
 credentials/
 
+# Credenciais e tokens da integração Google/Gmail
+google_token.json
+google_token*.json
+client_secret.json
+client_secret*.json
+
 # Python
 __pycache__/
 *.py[cod]
