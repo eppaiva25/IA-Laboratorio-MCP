@@ -4,6 +4,10 @@
 
 ---
 
+> **Guia de Aprendizado:** O documento mestre de aprendizado e continuidade do Laboratório de IA está em `GUIA-DE-APRENDIZADO.md` (V1.1, commit `d2df579`). Consulte-o como ponto de entrada para retomada de contexto. Este arquivo (`ESTADO-ATUAL.md`) complementa o Guia, detalhando o estado da Biblioteca Viva.
+
+---
+
 ## V2 — Status das Oportunidades
 
 | ID | Oportunidade | Status |
