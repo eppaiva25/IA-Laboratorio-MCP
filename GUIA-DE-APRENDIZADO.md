@@ -18,6 +18,8 @@ Ele existe para que:
 
 O Guia não substitui os arquivos de memória (`ESTADO-ATUAL.md`, `DECISOES.md`, `SESSOES/`). Ele os complementa, oferecendo uma visão transversal e atualizada.
 
+> **Nota sobre `DECISOES.md`:** O arquivo completo de decisões está em `V:\Claude Code\Laboratorio-IA\memoria\DECISOES.md` (fora deste repositório). Ele contém o histórico detalhado das decisões estruturais com suas justificativas. Este Guia contém uma síntese dessas decisões (seção 13) para fins de continuidade. A movimentação ou duplicação do `DECISOES.md` para este repositório não será feita agora — seu destino será decidido durante a futura consolidação estrutural dos repositórios.
+
 ---
 
 ## Regra de evidência
