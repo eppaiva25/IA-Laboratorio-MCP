@@ -178,6 +178,8 @@ entender → inspecionar → analisar → decidir → modificar → validar → 
 
 ### Hermes Agent (04–05/09/2026)
 
+> **Rigor de evidência:** as execuções descritas nesta seção e na seção 10 são **atividades documentadas como executadas em Docker** — o Git contém a documentação produzida pelo próprio projeto, não evidência independente de execução. Onde esta distinção existe, ela está marcada.
+
 - Hermes Agent instalado e configurado em Docker.
 - Interface: Telegram.
 - Container: `hermes-agent_web_1` (imagem `ghcr.io/getumbrel/hermes-agent-umbrel:v2026.8.19`).
@@ -185,11 +187,11 @@ entender → inspecionar → analisar → decidir → modificar → validar → 
 - OmniRoute como roteador de modelos (http://omniroute:20128).
 - Modelo customizado: `auto/best-free`.
 - Limite de contexto corrigido: 128000 tokens (era 1000000, causava HTTP 503).
-- Sistema de alertas e lembretes validado (Fase 1): criação, execução, notificação, cancelamento, fuso horário, prevenção de duplicação.
+- Sistema de alertas e lembretes documentado como executado e validado no ambiente Docker (Fase 1): criação, execução, notificação, cancelamento, fuso horário, prevenção de duplicação.
 
 ### Google Workspace (05/09/2026)
 
-- OAuth validado: `AUTHENTICATED` e `LIVE_CHECK_OK`.
+- OAuth validado (documentado como executado em Docker): `AUTHENTICATED` e `LIVE_CHECK_OK`.
 - Google Calendar testado em modo somente leitura (próximos 3 eventos / 7 dias).
 - Pendência: token parece root-owned; skill google-workspace pode tentar renová-lo.
 - Hermes contornou via API direta.
@@ -224,7 +226,22 @@ entender → inspecionar → analisar → decidir → modificar → validar → 
 
 - Interface do Hermes Agent.
 - Comunicação via bot.
-- Testes de alertas e lembretes realizados.
+- Testes de alertas e lembretes realizados (documentados como executados em Docker).
+
+### Ponte do Período 8 (25/08/2026)
+
+- Commit `49afbc5` (25/08 00:29), filho direto do fechamento do Período 8 (`d21324f`, 23/08): **evolução direta da mesma base de código confirmada** — compatibilidade determinística por extensão em `nucleo.py` (mapas `EXTENSAO_PARA_TIPO`/`TIPO_PARA_CATEGORIA_BASE` e `_categoria_base_compativel()`), folha "Áudio" no catálogo (13→14) e teste novo (`teste_compatibilidade_extensao.py`, 123 linhas).
+- Conteúdo interno remete ao trabalho de 23–24/08 (sessão `SESSOES/2026-08-23.md`, corrida de eventos de 24/08). Decisão de fronteira registrada: 25/08 é **fronteira administrativa**, não ruptura histórica comprovada; `49afbc5` é **ponte/extensão tardia do Período 8**.
+
+### Período 9 (03–07/09/2026)
+
+Trabalho inequivocamente novo após o Período 8. Classificação A/B aplicada: artefatos produzidos no período (A) versus patrimônio histórico anterior apenas descoberto durante a investigação (B).
+
+- **03/09 — Proteção de dados locais** (`b736852`): primeiro `.gitignore` do repositório (`.env`, chaves, `dados/`, mídias de teste, `eventos/*.jsonl`) + `VALIDACAO-TESTE-USUARIO.md` registrando a validação do teste físico de 23/08 (9/9 arquivos, hashes íntegros).
+- **04–05/09 — Hermes: alertas e contexto** (documentação em `Laboratorio-IA`, commits `0cdcf66`/`25c3529`/`026c49a`): Fase 1 de alertas e diagnóstico/correção do limite de contexto OmniRoute — atividade documentada como executada em Docker (falha HTTP 503 com ~106.879 tokens contra TPM 8.000 do Groq; correção `context_length: 128000` em `/opt/data/config.yaml`).
+- **06/09 — Hermes: Gmail e Calendar** (commits `4e16c33`/`ac0e967`): documentação [validado] das integrações, incluindo proteção de `google_token*.json`/`client_secret*.json`.
+- **07/09 — Consolidação do conhecimento** (commits `d2df579`/`bb3dbcf`/`0cf64e1`): este Guia (V1.1) + referências + registro da localização do `DECISOES.md`.
+- **07–09/09 — Investigação forense e transferência histórica:** Período 9 investigado, corrigido e transferido para `V:\LABORATORIO_IA\99-HISTORICO\` (commit `8c488f7`), com `METADADOS-ORIGEM.md` preservando proveniência (GIT CONFIRMADO / WORKTREE / DADOS INSUFICIENTES PARA VERIFICAR).
 
 ### Segurança
 
@@ -336,6 +353,30 @@ status → diff → add → diff --staged → commit → status
 - `git commit` — registrar no histórico.
 - `git restore <arquivo>` — descartar alteração.
 
+### Proveniência: o que o Git confirma (e o que não confirma)
+
+Aprendido na investigação histórica do Período 9. Duas igualdades que **não** são verdadeiras:
+
+1. **Arquivo existente ≠ arquivo versionado.** Um arquivo pode existir no disco (worktree) sem nunca ter sido commitado.
+2. **Hash igual ≠ existência de um blob Git correspondente.** O SHA-256 de um arquivo do worktree pode bater com o do destino de uma cópia, mas isso não prova que o conteúdo existe como objeto Git (blob) em nenhum repositório. Para isso é preciso verificar o objeto no banco do Git (`git cat-file`, `git show`).
+
+> **Importante prático:** `git rev-parse --verify <hash>` pode dar falso-positivo para hashes de 40 dígitos hexadecimais em algumas versões do Git. Use `git cat-file -t <hash>` para confirmar a existência real de um objeto.
+
+**Classificação de proveniência usada no laboratório:**
+
+| Categoria | Significado |
+|-----------|-------------|
+| **Commit** | Foto registrada no histórico, com hash, autor e data imutáveis. |
+| **Arquivo rastreado** | Sob vigiação do Git; alterações aparecem em `git status`/`git diff`. |
+| **Arquivo não rastreado** | No disco, fora do Git; sem histórico, sem hash, sem proveniência. |
+| **Arquivo ignorado** | Excluído deliberadamente do Git por `.gitignore` (dados locais, segredos, logs). |
+| **Patrimônio histórico** | Artefato cujo valor é documentar o que aconteceu; merece preservação com proveniência registrada. |
+| **Dado operacional** | Necessário para operar agora, mas sem valor histórico em si (logs, caches, backups). |
+| **Dado pessoal** | Conteúdo privado (ex.: inventário da biblioteca pessoal); nunca versionado sem decisão explícita. |
+| **Evidência documental** | Registro criado pelo próprio projeto sobre algo que aconteceu fora do Git — **documenta, mas não prova independentemente**. |
+
+**Convenção adotada** (em `V:\LABORATORIO_IA\99-HISTORICO\`): cada transferência registra origem, commit, data, SHA-256 e status de proveniência em `METADADOS-ORIGEM.md`, com três níveis: **GIT CONFIRMADO**, **WORKTREE** (nunca commitado) e **DADOS INSUFICIENTES PARA VERIFICAR**. Motivo: a primeira transferência do Período 8 copiou arquivos sem preservar proveniência de commit, e o objeto `d21324f` não existe no repositório de destino.
+
 ### Situação atual do Laboratório
 
 > ⚠️ **PROBLEMA ESTRUTURAL CONHECIDO — NÃO RESOLVIDO NESTA ETAPA**
@@ -434,11 +475,16 @@ Organiza arquivos de uma pasta de entrada dentro de uma biblioteca categorizada,
 | O1 — Taxonomia expandida | ✅ 14 folhas (era 9) | CONFIRMADO |
 | O3/DA4 — Qualidade de leitura | ✅ Heurística determinística | CONFIRMADO |
 | O5 — Consolidação | ✅ Ferramenta offline | CONFIRMADO |
+| Compatibilidade determinística por extensão (`49afbc5`, 25/08) | ✅ `_categoria_base_compativel()` + teste dedicado (123 linhas) | CONFIRMADO (código commitado e lido; execução do teste: DOCUMENTADO) |
 
 > **Nota sobre a validação dos 45 PDFs:** A movimentação e verificação dos 45 PDFs é um registro histórico validado em 22/08/2026. O incidente de 21/08/2026 (destruição de estado local) afetou o catálogo real. O estado atual dos 45 PDFs pode não corresponder ao resultado daquela validação. O catálogo real requer re-inventário antes de qualquer operação nova.
 
+> **Divergência documentada (descoberta na investigação do Período 9 — NÃO resolvida):** a pendência "catálogo vazio" foi registrada em `Laboratorio-IA\memoria\PENDENCIA-CATALOGO-VAZIO.md` (21/08 20:55), mas o arquivo `biblioteca-viva/dados/catalogo.csv` desse repositório foi preenchido com dados reais (~14,5 KB, 46 PDFs) às 21:24 do mesmo dia — 29 minutos depois, sem registro commitado. O arquivo contém **dados pessoais** (saúde, finanças, nomes) e é gitignored por política ("catálogo e diário nunca são versionados"). O re-inventário continua pendente; a divergência entre o registro da pendência e o estado real do arquivo permanece documentada, não corrigida. O mesmo vale para `diario.jsonl` (registro real de execução com dados pessoais, nunca versionado).
+
 ### Pendências
 
+- **O2 — Política de confiança/risco** — PENDENTE desde a proposta V2. Ausente também da lista de pendências desta seção até a revisão V1.2 (divergência corrigida aqui).
+- **O4 — Revisão pós-execução** — PENDENTE desde a proposta V2. Ausente também da lista de pendências desta seção até a revisão V1.2 (divergência corrigida aqui).
 - **Catálogo real vazio** — `catalogo.csv` tem apenas cabeçalho (consequência do incidente 21/08/2026). Requer re-inventário dos 45 PDFs.
 - **Incidente 21/08/2026** — suítes de teste destruíram estado local. Pendente: recuperar catálogo, corrigir isolamento das suítes.
 
@@ -511,14 +557,14 @@ Agente pessoal que conversa via Telegram, rodando em Docker, usando OmniRoute pa
 
 ### OAuth
 
-**CONFIRMADO:**
+**DOCUMENTADO (atividade documentada como executada em Docker; sem verificação independente):**
 - Autenticação OAuth validada via `setup.py --check`: resultado `AUTHENTICATED`.
 - Verificação ao vivo via `setup.py --check-live`: resultado `LIVE_CHECK_OK`.
 - Setup executado dentro do container do Hermes.
 
 ### Google Calendar
 
-**CONFIRMADO:**
+**DOCUMENTADO (atividade documentada como executada em Docker; sem verificação independente):**
 - Leitura testada em modo somente leitura.
 - Próximos 3 eventos / 7 dias validados.
 - Nenhum evento foi criado, editado ou excluído.
@@ -567,23 +613,25 @@ Agente pessoal que conversa via Telegram, rodando em Docker, usando OmniRoute pa
 
 ## 11. Estado atual
 
-### Estado atual — Setembro de 2026
+### Estado atual — Setembro de 2026 (após consolidação do Período 9)
 
 | Item | Status |
 |------|--------|
 | `IA-Laboratorio-MCP` | Fonte de verdade escolhida (provisória) |
 | `V:\Claude Code` | Repositório pai/guarda-chuva local (não é fonte de verdade) |
-| Guia de Aprendizado | Criado neste repositório |
+| Guia de Aprendizado | Criado neste repositório; V1.2 consolidado com o Período 9 |
+| Períodos históricos 1–9 | Investigados e transferidos para `V:\LABORATORIO_IA\99-HISTORICO\` (P8: `d75794b`; P9: `8c488f7`) com proveniência em `METADADOS-ORIGEM.md` |
+| Push do repositório histórico (`V:\LABORATORIO_IA`) | PENDENTE (não autorizado até o momento) |
 | Repositórios duplicados | Existentes, consolidação NÃO realizada |
 | HTML antigo | Preservado em `materiais-de-estudo/` |
 | Reorganização estrutural | NÃO realizada nesta etapa |
-| Biblioteca Viva V2 | Funcional e aprovada (validações históricas preservadas) |
-| Hermes Agent | Operacional com OmniRoute |
-| Google OAuth | CONFIRMADO: autenticado |
-| Google Calendar | CONFIRMADO: leitura validada (3 eventos / 7 dias) |
+| Biblioteca Viva V2 | Funcional e aprovada (validações históricas preservadas); compatibilidade por extensão adicionada em `49afbc5` |
+| Hermes Agent | Operacional com OmniRoute (atividade documentada como executada em Docker) |
+| Google OAuth | DOCUMENTADO: autenticado (`AUTHENTICATED`/`LIVE_CHECK_OK`, execução em Docker) |
+| Google Calendar | DOCUMENTADO: leitura validada (3 eventos / 7 dias, execução em Docker) |
 | Google Calendar (escrita) | PENDENTE: não testado |
 | Google Gmail | PENDENTE: validação completa não realizada |
-| Alertas do Hermes | Fase 1 validada |
+| Alertas do Hermes | Fase 1 documentada como executada e validada em Docker |
 | Git | Funcional nos subdiretórios; problema estrutural no nível pai |
 
 ### O que está confirmado
@@ -595,10 +643,11 @@ Agente pessoal que conversa via Telegram, rodando em Docker, usando OmniRoute pa
 - A consolidação ainda NÃO foi realizada.
 - O HTML antigo continua preservado.
 - Nenhuma reorganização estrutural foi feita nesta etapa.
-- OAuth Google está autenticado (CONFIRMADO).
-- Calendar leitura está validada (CONFIRMADO).
+- OAuth Google está autenticado (DOCUMENTADO — execução em Docker, sem verificação independente).
+- Calendar leitura está validada (DOCUMENTADO — execução em Docker, sem verificação independente).
 - Calendar escrita está pendente (PENDENTE).
 - Gmail está pendente de validação completa (PENDENTE).
+- O patrimônio dos Períodos 1–9 está preservado em `V:\LABORATORIO_IA\99-HISTORICO\` (commits `d75794b` e `8c488f7`), com hash SHA-256 e proveniência por arquivo; os repositórios de origem não foram alterados pela transferência.
 
 ---
 
@@ -618,10 +667,27 @@ Agente pessoal que conversa via Telegram, rodando em Docker, usando OmniRoute pa
 | 10 | Resolver problema de ownership do token Google | PENDENTE | Média |
 | 11 | Testar escrita no Google Calendar (criação/edição/exclusão de eventos) | PENDENTE | Baixa |
 | 12 | Investigar renovação automática do token pela skill google-workspace | PENDENTE | Baixa |
+| 13 | O2 — Política de confiança/risco da Biblioteca Viva (pendente desde a proposta V2) | PENDENTE | Média |
+| 14 | O4 — Revisão pós-execução da Biblioteca Viva (pendente desde a proposta V2) | PENDENTE | Média |
+| 15 | Autorizar/realizar push do repositório histórico `V:\LABORATORIO_IA` | PENDENTE | Baixa |
+| 16 | Definir destino/proveniência dos artefatos de teste de agosto em `Laboratorio-IA` (`sandbox.ps1`, `resposta_inicial.txt`, suítes `.ps1` modificadas — sem proveniência Git) | PENDENTE | Baixa |
+| 17 | Decidir a preservação histórica de `catalogo.csv`/`diario.jsonl` (dados pessoais reais; exigem decisão explícita) | PENDENTE | Média |
 
 ---
 
 ## 13. Decisões importantes
+
+### 2026-09-09 — Fronteira entre o Período 8 e o Período 9
+
+**Decisão:** `49afbc5` (25/08/2026) é classificado como **ponte/extensão tardia do Período 8**, não como início do Período 9. O trabalho inequivocamente novo do Período 9 começa em `b736852` (03/09/2026).
+
+**Motivo:** `49afbc5` é filho direto do fechamento do Período 8 (`d21324f`, 23/08) e seu conteúdo interno remete ao trabalho de 23–24/08 (sessão de 23/08, corrida de eventos de 24/08). A data de 25/08 é fronteira administrativa, não ruptura histórica comprovada.
+
+### 2026-09-09 — Proveniência obrigatória em transferências históricas
+
+**Decisão:** toda transferência de patrimônio para `V:\LABORATORIO_IA\99-HISTORICO\` deve registrar origem, commit, data, SHA-256 e status de proveniência (GIT CONFIRMADO / WORKTREE / DADOS INSUFICIENTES PARA VERIFICAR) em `METADADOS-ORIGEM.md`.
+
+**Motivo:** a primeira transferência (Período 8, commit `d75794b`) copiou arquivos sem preservar a proveniência de commit — o objeto `d21324f` não existe no repositório de destino. A transferência do Período 9 (commit `8c488f7`) já seguiu a convenção.
 
 ### 2026-09-07 — Não reorganizar agora
 
@@ -677,8 +743,10 @@ Agente pessoal que conversa via Telegram, rodando em Docker, usando OmniRoute pa
 - Ferramentas: conceito, leitura/escrita de arquivos, execução de comandos.
 - Docker: imagens, containers, volumes, diagnóstico.
 - Segurança: DPAPI, wrappers, limpeza de ambiente.
-- Biblioteca Viva: princípio central, ciclo do agente, validações.
+- Biblioteca Viva: princípio central, ciclo do agente, validações, compatibilidade determinística por extensão.
 - Hermes Agent: instalação, configuração, alertas, OAuth.
+- Contexto e limites: contexto disponível versus contexto necessário; TPM de providers (Groq: 8.000); diagnóstico de HTTP 503; configuração de `context_length` (documentado em 05/09).
+- Proveniência: arquivo existente ≠ arquivo versionado; hash igual ≠ blob Git; commit / rastreado / não rastreado / ignorado; evidência documental ≠ prova independente (ver seção 6).
 
 ### Conceitos em consolidação
 
@@ -712,6 +780,22 @@ Após uma pausa (semana, mês, ou mais):
 ---
 
 ## 16. Referências técnicas
+
+### Locais do laboratório (referências vivas — não duplicar)
+
+| Local | Conteúdo |
+|-------|----------|
+| `V:\LABORATORIO_IA\99-HISTORICO\` | Patrimônio histórico dos Períodos 1–9, com `METADADOS-ORIGEM.md` por transferência (P8: commit `d75794b`; P9: commit `8c488f7`) |
+| `V:\LABORATORIO_IA\99-HISTORICO\IA-Laboratorio-MCP\2026-08-25\` | Código do `49afbc5` (compatibilidade por extensão), memória de sessão de 23/08 e corrida de eventos de 24/08 |
+| `V:\LABORATORIO_IA\99-HISTORICO\IA-Laboratorio-MCP\2026-09-03\` | `VALIDACAO-TESTE-USUARIO.md` e o primeiro `.gitignore` (`b736852`) |
+| `V:\LABORATORIO_IA\99-HISTORICO\IA-Laboratorio-MCP\2026-09-06\` e `2026-09-07\` | Documentação Gmail/Calendar do Hermes e este Guia (versão `0cf64e1`) |
+| `V:\LABORATORIO_IA\99-HISTORICO\Laboratorio-IA\2026-09-04\` e `2026-09-05\` | Documentação Hermes: alertas (Fase 1), diagnóstico OmniRoute/OAuth/Calendar |
+| `docs/hermes/gmail.md` e `docs/hermes/calendar.md` (neste repositório) | Documentação [validado] das integrações do Hermes |
+| `02-agentes/biblioteca-viva/VALIDACAO-TESTE-USUARIO.md` (neste repositório) | Validação do teste físico de 23/08 |
+| `memoria/ESTADO-ATUAL.md` (neste repositório) | Estado operacional corrente |
+| `V:\Claude Code\Laboratorio-IA\hermes-agent\docs\` | Documentação Hermes original: `alertas/fase-1.md` e `omniroute-contexto/00–03` |
+| `V:\Claude Code\Laboratorio-IA\memoria\DECISOES.md` | Decisões estruturais completas (ver nota na seção 1) |
+| `V:\Claude Code\Laboratorio-IA\biblioteca-viva\dados\` | Dados reais da Biblioteca Viva PowerShell — gitignored, contêm dados pessoais; não versionar sem decisão |
 
 ### Git
 
@@ -753,7 +837,7 @@ Após uma pausa (semana, mês, ou mais):
 
 ## 17. Próximo ponto de retomada
 
-> **Próximo passo:** Revisar este Guia V1, validar se ele representa corretamente o conhecimento acumulado e somente depois iniciar a consolidação estrutural dos repositórios.
+> **Próximo passo:** a consolidação do conhecimento está feita (Guia V1.2) e o patrimônio dos Períodos 1–9 está preservado em `99-HISTORICO`. A etapa lógica seguinte é a **consolidação estrutural dos repositórios** (resolver os três remotes, o destino do `DSH-Analise-Biblioteca-Viva` e o papel do repositório pai), sempre preservando históricos e proveniência. As pendências das seções 8 e 12 permanecem abertas — nenhuma foi resolvida nesta revisão.
 
 **Antes de qualquer reorganização:**
 1. Confirmar que este Guia está completo e correto.
@@ -770,6 +854,7 @@ Após uma pausa (semana, mês, ou mais):
 |------|--------|-----------|
 | 2026-09-07 | V1 | Criação do Guia mestre e registro da situação estrutural atual |
 | 2026-09-07 | V1.1 | Revisão de evidências, correção da arquitetura Git, contextualização da Biblioteca Viva e maior precisão sobre Google Workspace |
+| 2026-09-09 | V1.2 | Reparo da corrupção da linha 1; consolidação do Período 9 (ponte 25/08, período 03–07/09); seção de proveniência Git; rigor de evidência Hermes/Google (documentado ≠ confirmado); pendências O2/O4 e novas pendências; decisões de fronteira e proveniência; referências ao `99-HISTORICO` |
 
 ---
 
